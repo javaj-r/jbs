@@ -11,6 +11,7 @@
     <modules>
         <module>model</module>
         <module>control</module>
+        <module>view</module>
     </modules>
 
     <properties>
