@@ -11,13 +11,10 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Person extends User {
+public class Person extends BaseEntity {
 
     private String firstname;
     private String lastname;
     private Long nationalCode;
-    private String email;
-    private Long phoneNumber;
-    private Address address;
 
 }
