@@ -105,7 +105,7 @@ public class BranchRepositoryImpl implements BranchRepository {
                 FROM branch b
                          LEFT JOIN address a on a.id = b.address_id
                          LEFT JOIN employee e on b.id = e.branch_id
-                         LEFT JOIN bank b2 on b2.id = b.bank_id;
+                         LEFT JOIN bank b2 on b2.id = b.bank_id
                 WHERE b.id = ?;
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
