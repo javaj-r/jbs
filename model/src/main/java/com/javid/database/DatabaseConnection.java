@@ -43,7 +43,7 @@ public class DatabaseConnection {
 
     private void setConnection() {
         try {
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "1377");
+            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/bank_system", "postgres", "123");
         } catch (SQLException e) {
             e.printStackTrace();
         }
