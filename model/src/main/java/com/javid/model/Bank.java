@@ -13,9 +13,17 @@ import java.util.Set;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Bank extends NamedEntity{
+public class Bank extends NamedEntity {
 
     private Employee manager;
     private Set<Branch> branches;
 
+    @Override
+    public String toString() {
+        return "{ " +
+                "id=" + getId() +
+                " name=" + getName() +
+                " managerId=" + (manager == null ? "no manager" : manager.getId()) +
+                " }";
+    }
 }
