@@ -26,18 +26,6 @@ CREATE TYPE TRANSACTION_TYPE AS ENUM (
     'DEPOSIT'
     );
 
--- DROP TABLE IF EXISTS address;
-
-CREATE TABLE IF NOT EXISTS address
-(
-    id          BIGSERIAL PRIMARY KEY,
-    country     VARCHAR(100),
-    state       VARCHAR(100),
-    city        VARCHAR(100),
-    street      VARCHAR(100),
-    postal_code BIGINT
-);
-
 -- DROP TABLE IF EXISTS person;
 
 CREATE TABLE IF NOT EXISTS person
@@ -74,9 +62,7 @@ CREATE TABLE IF NOT EXISTS branch
     name       VARCHAR(100),
     bank_id    BIGINT,
     manager_id BIGINT,
-    address_id BIGINT,
-    CONSTRAINT fk_branch_bank FOREIGN KEY (bank_id) REFERENCES bank (id),
-    CONSTRAINT fk_branch_address FOREIGN KEY (address_id) REFERENCES address (id)
+    CONSTRAINT fk_branch_bank FOREIGN KEY (bank_id) REFERENCES bank (id)
 );
 
 -- DROP TABLE IF EXISTS employee;
@@ -84,6 +70,8 @@ CREATE TABLE IF NOT EXISTS branch
 CREATE TABLE IF NOT EXISTS employee
 (
     id         BIGSERIAL PRIMARY KEY,
+    username   VARCHAR(100),
+    password   VARCHAR(100),
     person_id  BIGINT,
     branch_id  BIGINT,
     manager_id BIGINT,
@@ -91,6 +79,7 @@ CREATE TABLE IF NOT EXISTS employee
     CONSTRAINT fk_employee_branch FOREIGN KEY (branch_id) REFERENCES branch (id),
     CONSTRAINT fk_employee_manager FOREIGN KEY (manager_id) REFERENCES employee (id)
 );
+
 /*
 ALTER TABLE branch
     DROP CONSTRAINT IF EXISTS fk_branch_manager;
@@ -124,14 +113,21 @@ CREATE TABLE IF NOT EXISTS card
     password1   INTEGER,
     password2   INTEGER,
     account_id  INTEGER,
-    CONSTRAINT fk_card_account FOREIGN KEY (account_id) REFERENCES account (id)
+    CONSTRAINT fk_card_account FOREIGN KEY (account_id) REFERENCES account (id) ON DELETE CASCADE
 );
+
+
+
+ALTER TABLE card
+    Add CONSTRAINT fk_card_account
+        FOREIGN KEY (account_id) REFERENCES account (id) ON DELETE CASCADE;
+
 /*
 ALTER TABLE account
     DROP CONSTRAINT IF EXISTS fk_account_card;
 */
 ALTER TABLE account
-    ADD CONSTRAINT fk_account_card FOREIGN KEY (card_id) REFERENCES card (id);
+    ADD CONSTRAINT fk_account_card FOREIGN KEY (card_id) REFERENCES card (id) ON DELETE SET NULL;
 
 
 -- DROP TABLE IF EXISTS transactions;
