@@ -21,4 +21,16 @@ public class Account extends BaseEntity {
     private Long balance;
     private boolean enabled;
     private Set<Transaction> transactions;
+
+    @Override
+    public String toString() {
+        return "{ " +
+                "id=" + getId() +
+                ", branchId=" + (branch == null ? "no branch": branch.getId()) +
+                ", customerId=" + (customer == null? "no customer" : customer.getId()) +
+                ", cardId=" + (card == null? "no card" : card.getId()) +
+                ", balance=" + balance +
+                ", enabled=" + enabled +
+                " }";
+    }
 }
