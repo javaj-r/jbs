@@ -104,7 +104,7 @@ public class CardRepositoryImpl implements CardRepository {
     public Long save(Card entity) {
         setConnection();
         String query = """
-                INSERT INTO card(cvv2, expire_date, enabled, account_id)
+                INSERT INTO card(cvv2, expire_date, enabled, account_id, card_number)
                 values (?, ?, ?, ?);
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -176,5 +176,24 @@ public class CardRepositoryImpl implements CardRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Date getExpireDate(int year) {
+        setConnection();
+        String query = """
+                SELECT (date_trunc('MONTH', current_date::date) + INTERVAL '? YEAR + 1 MONTH - 1 day')::DATE;
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setInt(1, year);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getDate(1);
+            }
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
