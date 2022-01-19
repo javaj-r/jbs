@@ -2,14 +2,12 @@ package com.javid.repository.jdbc;
 
 import com.javid.database.DatabaseConnection;
 import com.javid.model.Branch;
-import com.javid.model.Customer;
 import com.javid.model.Employee;
 import com.javid.repository.EmployeeRepository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author javid
@@ -28,7 +26,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
         setConnection();
         List<Employee> employees = new ArrayList<>();
         String query = """
-                SELECT e.id, p.firstname, p.lastname, p.national_code, e.branch_id, e.manager_id
+                SELECT e.id, e.username, e.password, p.firstname, p.lastname, p.national_code, e.branch_id, e.manager_id
                 FROM employee e
                          LEFT JOIN person p on p.id = e.person_id;
                 """;
@@ -42,6 +40,8 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                 manager.setId(resultSet.getLong("manager_id"));
 
                 Employee employee = new Employee()
+                        .setUsername(resultSet.getString("username"))
+                        .setPassword(resultSet.getString("password"))
                         .setBranch(branch)
                         .setManager(manager);
                 employee.setFirstname(resultSet.getString("firstname"))
@@ -65,7 +65,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
         setConnection();
         Employee employee = new Employee();
         String query = """
-                SELECT e.id, p.firstname, p.lastname, p.national_code, e.branch_id, e.manager_id
+                SELECT e.id, e.username, e.password, p.firstname, p.lastname, p.national_code, e.branch_id, e.manager_id
                 FROM employee e
                          LEFT JOIN person p on p.id = e.person_id
                 WHERE e.id = ?;
@@ -80,7 +80,9 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                 Employee manager = new Employee();
                 manager.setId(resultSet.getLong("manager_id"));
 
-                employee.setBranch(branch)
+                employee.setUsername(resultSet.getString("username"))
+                        .setPassword(resultSet.getString("password"))
+                        .setBranch(branch)
                         .setManager(manager);
                 employee.setFirstname(resultSet.getString("firstname"))
                         .setLastname(resultSet.getString("lastname"))
@@ -106,8 +108,8 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                         RETURNING id
                 )
                 INSERT
-                INTO employee(person_id, branch_id, manager_id)
-                SELECT d.person_id, ?, ?
+                INTO employee(username, password, person_id, branch_id, manager_id)
+                SELECT d.person_id, ?, ?, ?, ?
                 FROM data d;
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -119,16 +121,19 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                 statement.setLong(3, entity.getNationalCode());
             }
 
+            statement.setString(4, entity.getUsername());
+            statement.setString(5, entity.getPassword());
+
             if (entity.getBranch() == null || entity.getBranch().isNew()) {
-                statement.setNull(4, Types.BIGINT);
+                statement.setNull(6, Types.BIGINT);
             } else {
-                statement.setLong(4, entity.getBranch().getId());
+                statement.setLong(6, entity.getBranch().getId());
             }
 
             if (entity.getManager() == null || entity.getManager().isNew()) {
-                statement.setNull(5, Types.BIGINT);
+                statement.setNull(7, Types.BIGINT);
             } else {
-                statement.setLong(5, entity.getManager().getId());
+                statement.setLong(7, entity.getManager().getId());
             }
             statement.execute();
             ResultSet resultSet = statement.getGeneratedKeys();
@@ -172,9 +177,11 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                     lastname=?,
                     national_code=?
                 WHERE id = (SELECT person_id FROM employee e WHERE e.id = ?);
-                
+                                
                 UPDATE employee
-                SET branch_id=?,
+                SET username=?,
+                    password=?,
+                    branch_id=?,
                     manager_id=?
                 WHERE id=?;
                 """;
@@ -187,19 +194,21 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                 statement.setLong(3, entity.getNationalCode());
             }
             statement.setLong(4, entity.getId());
+            statement.setString(5, entity.getUsername());
+            statement.setString(6, entity.getPassword());
 
             if (entity.getBranch() == null || entity.getBranch().isNew()) {
-                statement.setNull(5, Types.BIGINT);
+                statement.setNull(7, Types.BIGINT);
             } else {
-                statement.setLong(5, entity.getBranch().getId());
+                statement.setLong(7, entity.getBranch().getId());
             }
 
             if (entity.getManager() == null || entity.getManager().isNew()) {
-                statement.setNull(6, Types.BIGINT);
+                statement.setNull(8, Types.BIGINT);
             } else {
-                statement.setLong(6, entity.getManager().getId());
+                statement.setLong(8, entity.getManager().getId());
             }
-            statement.setLong(7, entity.getId());
+            statement.setLong(9, entity.getId());
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
