@@ -32,6 +32,10 @@ public class BankConsole {
         return bank;
     }
 
+    public void setBank(Bank bank) {
+        this.bank = bank;
+    }
+
     public void mainMenu() {
         while (true) {
             int choice = Screen.showMenu("", "", "Select from menu: ", "Invalid choice."
@@ -41,9 +45,8 @@ public class BankConsole {
                     , "Update bank"
                     , "Delete bank");
 
-            if (choice == 0) {
+            if (choice == 0)
                 break;
-            }
 
             switch (choice) {
                 case 1 -> selectBank();
@@ -51,13 +54,10 @@ public class BankConsole {
                 case 3 -> updateBank();
                 case 4 -> deleteBank();
             }
-
         }
-
-
     }
 
-    private void selectBank() {
+    public void selectBank() {
         List<Bank> banks = bankService.findAll();
         String[] arr = banks.stream().map(Bank::toString)
                 .toList()
@@ -67,9 +67,25 @@ public class BankConsole {
                 , "Cancel"
                 , arr);
 
-        if (choice != 0) {
+        if (choice > 0) {
             bank = banks.get(choice - 1);
         }
+    }
+
+    public Bank selectBank(String message) {
+        List<Bank> banks = bankService.findAll();
+        String[] arr = banks.stream().map(Bank::toString)
+                .toList()
+                .toArray(new String[0]);
+
+        int choice = Screen.showMenu("", "", message, "Invalid choice"
+                , "Cancel"
+                , arr);
+
+        if (choice == 0) {
+            return new Bank();
+        }
+        return banks.get(choice - 1);
     }
 
     private void createBank() {
