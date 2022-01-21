@@ -34,10 +34,12 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Branch branch = new Branch();
-                branch.setId(resultSet.getLong("branch_id"));
+                long tempId = resultSet.getLong("branch_id");
+                branch.setId(resultSet.wasNull() ? null : tempId);
 
                 Employee manager = new Employee();
-                manager.setId(resultSet.getLong("manager_id"));
+                tempId = resultSet.getLong("manager_id");
+                manager.setId(resultSet.wasNull() ? null : tempId);
 
                 Employee employee = new Employee()
                         .setUsername(resultSet.getString("username"))
@@ -47,7 +49,8 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                 employee.setFirstname(resultSet.getString("firstname"))
                         .setLastname(resultSet.getString("lastname"))
                         .setNationalCode(resultSet.getLong("national_code"));
-                employee.setId(resultSet.getLong("id"));
+                tempId = resultSet.getLong("id");
+                employee.setId(resultSet.wasNull() ? null : tempId);
 
                 employees.add(employee);
             }
@@ -75,10 +78,12 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 Branch branch = new Branch();
-                branch.setId(resultSet.getLong("branch_id"));
+                long tempId = resultSet.getLong("branch_id");
+                branch.setId(resultSet.wasNull() ? null : tempId);
 
                 Employee manager = new Employee();
-                manager.setId(resultSet.getLong("manager_id"));
+                tempId = resultSet.getLong("manager_id");
+                manager.setId(resultSet.wasNull() ? null : tempId);
 
                 employee.setUsername(resultSet.getString("username"))
                         .setPassword(resultSet.getString("password"))
@@ -87,7 +92,8 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                 employee.setFirstname(resultSet.getString("firstname"))
                         .setLastname(resultSet.getString("lastname"))
                         .setNationalCode(resultSet.getLong("national_code"));
-                employee.setId(resultSet.getLong("id"));
+                tempId = resultSet.getLong("id");
+                employee.setId(resultSet.wasNull() ? null : tempId);
             }
 
             return employee;
@@ -108,7 +114,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                         RETURNING id
                 )
                 INSERT
-                INTO employee(username, password, person_id, branch_id, manager_id)
+                INTO employee(person_id, username, password, branch_id, manager_id)
                 SELECT d.person_id, ?, ?, ?, ?
                 FROM data d;
                 """;
@@ -162,6 +168,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
+            statement.setLong(2, id);
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
