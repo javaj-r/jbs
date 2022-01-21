@@ -23,4 +23,23 @@ public class Card extends BaseEntity {
     private Integer password2;
     private boolean enabled;
 
+    @Override
+    public Card setId(Long id) {
+        super.setId(id);
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "{ " +
+                "id=" + getId() +
+                ", accountId=" + (account == null ? "'no account'" : account.getId()) +
+                ", number=" + number +
+                ", expireDate=" + expireDate +
+                ", cvv2=" + cvv2 +
+                ", password1=" + password1 +
+                ", password2=" + password2 +
+                ", enabled=" + enabled +
+                " }";
+    }
 }

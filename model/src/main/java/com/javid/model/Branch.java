@@ -13,19 +13,24 @@ import java.util.Set;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Branch extends NamedEntity{
+public class Branch extends BaseEntity {
 
-    private Bank bank;
+    private String name;
     private Employee manager;
     private Set<Employee> employees;
+
+    @Override
+    public Branch setId(Long id) {
+        super.setId(id);
+        return this;
+    }
 
     @Override
     public String toString() {
         return "{ " +
                 "id=" + getId() +
                 ", name=" + getName() +
-                ", bankId=" + (bank == null ? "no manager" : bank.getId()) +
-                ", managerId=" + (manager == null ? "no manager" : manager.getId()) +
+                ", managerId=" + (manager == null ? "'no manager'" : manager.getId()) +
                 " }";
     }
 }
