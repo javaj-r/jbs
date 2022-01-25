@@ -1,6 +1,5 @@
 package com.javid.console;
 
-import com.javid.model.Bank;
 import com.javid.model.Branch;
 import com.javid.model.Employee;
 import com.javid.service.BranchService;
@@ -27,12 +26,6 @@ public class BranchConsole {
 
     private BranchConsole() {
         branchService = new BranchService();
-
-        if (BankConsole.getInstance().getBank() != null) {
-            List<Branch> branches = branchService.findAll(BankConsole.getInstance().getBank());
-            if (!branches.isEmpty())
-                branch = branches.get(0);
-        }
     }
 
     public Branch getBranch() {
@@ -66,16 +59,15 @@ public class BranchConsole {
 
     public void selectBranch() {
         Branch branch1 = selectBranch("Select from menu: ");
-
         if (!branch1.isNew()) {
             branch = branch1;
         }
     }
 
-
     public Branch selectBranch(String message) {
         List<Branch> branches = branchService.findAll();
-        String[] arr = branches.stream().map(Branch::toString)
+        String[] arr = branches.stream()
+                .map(Branch::toString)
                 .toList()
                 .toArray(new String[0]);
 
@@ -91,15 +83,12 @@ public class BranchConsole {
     }
 
     private void createBranch() {
-        Branch branch1 = new Branch();
-        branch1.setName(Screen.getString("Enter branch name: "));
-        branch1.setBank(BankConsole.getInstance().selectBank("Select Bank: "));
-        branch1.setManager(EmployeeConsole.getInstance().selectEmployee("Select Manager: "));
+        Branch branch1 = new Branch()
+                .setName(Screen.getString("Enter branch name: "));
 
         branch1 = branchService.create(branch1);
         if (!branch1.isNew()) {
             branch = branch1;
-            System.out.println(branch1);
         }
     }
 
@@ -108,11 +97,6 @@ public class BranchConsole {
         String name = Screen.getString("Enter - or new name: ");
         if (!"-".equals(name.trim())) {
             branch.setName(name);
-        }
-
-        Bank bank = BankConsole.getInstance().selectBank("Select new bank or cancel: ");
-        if (!bank.isNew() && bank.getId() > 0) {
-            branch1.setBank(bank);
         }
 
         Employee manager = EmployeeConsole.getInstance().selectEmployee("Select new manager or cancel: ");
@@ -125,8 +109,8 @@ public class BranchConsole {
 
     private void deleteBranch() {
         Branch branch1 = selectBranch("Select branch to delete");
-        if (!branch1.isNew()) {
-            branchService.delete(branch1);
-        }
+        if (branch1.isNew())
+            return;
+        branchService.delete(branch1);
     }
 }
