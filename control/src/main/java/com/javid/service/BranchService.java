@@ -1,6 +1,5 @@
 package com.javid.service;
 
-import com.javid.model.Bank;
 import com.javid.model.Branch;
 import com.javid.repository.BranchRepository;
 import com.javid.repository.jdbc.BranchRepositoryImpl;
@@ -13,7 +12,7 @@ import java.util.List;
  */
 public class BranchService {
 
-    private BranchRepository repository = new BranchRepositoryImpl();
+    private final BranchRepository repository = new BranchRepositoryImpl();
 
     public Branch create(Branch branch) {
         branch.setId(repository.save(branch));
@@ -22,13 +21,6 @@ public class BranchService {
 
     public List<Branch> findAll() {
         return repository.findAll();
-    }
-
-    public List<Branch> findAll(Bank bank) {
-        return repository.findAll().stream()
-                .filter(branch -> branch.getBank() != null)
-                .filter(branch -> bank.getId().equals(branch.getBank().getId()))
-                .toList();
     }
 
     public void update(Branch branch) {
