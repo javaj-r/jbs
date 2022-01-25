@@ -22,4 +22,23 @@ public class Transaction extends BaseEntity {
     private Date date;
     private TransactionType type;
     private TransactionStatus status;
+
+    @Override
+    public Transaction setId(Long id) {
+        super.setId(id);
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "{ " +
+               "id=" + getId() +
+               ", amount=" + amount +
+               ", accountId=" + (account == null ? "'no account'" : account.getId()) +
+               ", time=" + time +
+               ", date=" + date +
+               ", type=" + (type == null ? null : type.name()) +
+               ", status=" + (status == null ? null : status.name()) +
+               " }";
+    }
 }

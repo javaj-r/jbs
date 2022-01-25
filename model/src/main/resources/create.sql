@@ -1,15 +1,14 @@
 -- DROP DATABASE IF EXISTS bank_system;
+
 /*
-CREATE DATABASE bank_system
+CREATE DATABASE javid_bank_system
     WITH
     ENCODING = 'UTF8';
-
 */
 
 -- CREATE SCHEMA IF NOT EXISTS public;
 
--- SET SEARCH_PATH TO bank_system, public;
-
+-- SET SEARCH_PATH TO javid_bank_system, public;
 
 -- DROP TYPE IF EXISTS TRANSACTION_STATUS;
 
@@ -26,32 +25,23 @@ CREATE TYPE TRANSACTION_TYPE AS ENUM (
     'DEPOSIT'
     );
 
--- DROP TABLE IF EXISTS person;
+-- DROP TYPE IF EXISTS EMPLOYEE_ROLE;
 
-CREATE TABLE IF NOT EXISTS person
-(
-    id            BIGSERIAL PRIMARY KEY,
-    firstname     VARCHAR(100),
-    lastname      VARCHAR(100),
-    national_code BIGINT
-);
+CREATE TYPE EMPLOYEE_ROLE AS ENUM (
+    'ADMIN',
+    'BANK_MANAGER',
+    'BRANCH_MANAGER',
+    'CASHIER'
+    );
 
 -- DROP TABLE IF EXISTS customer;
 
 CREATE TABLE IF NOT EXISTS customer
 (
-    id        BIGSERIAL PRIMARY KEY,
-    person_id BIGINT,
-    CONSTRAINT fk_customer_person FOREIGN KEY (person_id) REFERENCES person (id)
-);
-
--- DROP TABLE IF EXISTS bank;
-
-CREATE TABLE IF NOT EXISTS bank
-(
-    id         BIGSERIAL PRIMARY KEY,
-    name       VARCHAR(100),
-    manager_id BIGINT
+    id            BIGSERIAL PRIMARY KEY,
+    firstname     VARCHAR(100),
+    lastname      VARCHAR(100),
+    national_code BIGINT UNIQUE
 );
 
 -- DROP TABLE IF EXISTS branch;
@@ -60,9 +50,7 @@ CREATE TABLE IF NOT EXISTS branch
 (
     id         BIGSERIAL PRIMARY KEY,
     name       VARCHAR(100),
-    bank_id    BIGINT,
-    manager_id BIGINT,
-    CONSTRAINT fk_branch_bank FOREIGN KEY (bank_id) REFERENCES bank (id)
+    manager_id BIGINT UNIQUE
 );
 
 -- DROP TABLE IF EXISTS employee;
@@ -70,12 +58,11 @@ CREATE TABLE IF NOT EXISTS branch
 CREATE TABLE IF NOT EXISTS employee
 (
     id         BIGSERIAL PRIMARY KEY,
-    username   VARCHAR(100),
+    username   VARCHAR(100) UNIQUE,
     password   VARCHAR(100),
-    person_id  BIGINT,
     branch_id  BIGINT,
     manager_id BIGINT,
-    CONSTRAINT fk_employee_person FOREIGN KEY (person_id) REFERENCES person (id),
+    role       employee_role,
     CONSTRAINT fk_employee_branch FOREIGN KEY (branch_id) REFERENCES branch (id),
     CONSTRAINT fk_employee_manager FOREIGN KEY (manager_id) REFERENCES employee (id)
 );
@@ -116,19 +103,12 @@ CREATE TABLE IF NOT EXISTS card
     CONSTRAINT fk_card_account FOREIGN KEY (account_id) REFERENCES account (id) ON DELETE CASCADE
 );
 
-
-
-ALTER TABLE card
-    Add CONSTRAINT fk_card_account
-        FOREIGN KEY (account_id) REFERENCES account (id) ON DELETE CASCADE;
-
 /*
 ALTER TABLE account
     DROP CONSTRAINT IF EXISTS fk_account_card;
 */
 ALTER TABLE account
     ADD CONSTRAINT fk_account_card FOREIGN KEY (card_id) REFERENCES card (id) ON DELETE SET NULL;
-
 
 -- DROP TABLE IF EXISTS transactions;
 
@@ -143,4 +123,3 @@ CREATE TABLE IF NOT EXISTS transactions
     t_status   TRANSACTION_STATUS,
     CONSTRAINT fk_transactions_account FOREIGN KEY (account_id) REFERENCES account (id)
 );
-

@@ -1,7 +1,9 @@
 package com.javid.console;
 
 import com.javid.Application;
+import com.javid.model.Branch;
 import com.javid.model.Employee;
+import com.javid.model.EmployeeRole;
 import com.javid.service.EmployeeService;
 import com.javid.util.Screen;
 
@@ -58,20 +60,11 @@ public class EmployeeConsole {
     }
 
     public void selectEmployee() {
-        List<Employee> employees = employeeService.findAll();
-        String[] arr = employees.stream().map(Employee::toString)
-                .toList()
-                .toArray(new String[0]);
-
-        int choice = Screen.showMenu("", "", "Select from menu: ", "Invalid choice"
-                , "Cancel"
-                , arr);
-
-        if (choice > 0) {
-            employee = employees.get(choice - 1);
-        }
+        Employee employee1 = selectEmployee("Select from menu: ");
+        if (employee1.isNew())
+            return;
+        employee = employee1;
     }
-
 
     public Employee selectEmployee(String message) {
         List<Employee> employees = employeeService.findAll();
@@ -79,7 +72,8 @@ public class EmployeeConsole {
                 .toList()
                 .toArray(new String[0]);
 
-        int choice = Screen.showMenu("", "", message, "Invalid choice"
+        int choice = Screen.showMenu("", ""
+                , message, "Invalid choice"
                 , "Cancel"
                 , arr);
 
@@ -90,11 +84,10 @@ public class EmployeeConsole {
     }
 
     private void createEmployee() {
-        String firstname = Screen.getString("Enter firstname: ");
-        String lastname = Screen.getString("Enter lastname: ");
-        Long nationalCode = Screen.getLong("Enter national cold: ", "Invalid number.");
         String username = Screen.getString("Enter username: ");
         String password = Screen.getString("Enter password: ");
+
+        EmployeeRole role = selectRole("Select from menu: ");
 
         System.out.println("Select manager.");
         selectEmployee();
@@ -103,50 +96,70 @@ public class EmployeeConsole {
         BranchConsole branchConsole = BranchConsole.getInstance();
         branchConsole.selectBranch();
 
-        Employee employee1 = new Employee();
-        employee1.setUsername(username)
+        Employee employee1 = new Employee()
+                .setUsername(username)
                 .setPassword(password)
+                .setRole(role)
                 .setManager(this.employee)
-                .setBranch(branchConsole.getBranch())
-                .setFirstname(firstname)
-                .setLastname(lastname)
-                .setNationalCode(nationalCode);
+                .setBranch(branchConsole.getBranch());
         employee1 = employeeService.create(employee1);
         if (!employee1.isNew()) {
             employee = employee1;
         }
     }
 
-    private void updateEmployee() {
-        Employee employee1 = selectEmployee("Select employee to update");
-        String firstname = Screen.getString("Enter - or new firstname: ");
-        String lastname = Screen.getString("Enter - or new lastname: ");
-        Long nationalCode = Screen.getLong("Enter 0 or new national code: ", "Invalid number.");
-        String username = Screen.getString("Enter - or new username: ");
-        String password = Screen.getPassword("Enter - or new password: ");
+    private EmployeeRole selectRole(String message) {
+        int choice = Screen.showMenu("Select employee role.", ""
+                , message, "Invalid choice"
+                , "Cancel", EmployeeRole.stringValues());
 
-        if (Application.isForUpdate(firstname)) {
-            employee1.setFirstname(firstname.trim());
+        if (choice == 0) {
+            return null;
         }
-        if (Application.isForUpdate(lastname)) {
-            employee1.setLastname(lastname.trim());
+
+        return EmployeeRole.values()[choice - 1];
+    }
+
+    private void updateEmployee() {
+        Employee employee1 = selectEmployee("Select employee to update: ");
+        if (employee1.isNew())
+            return;
+
+        while (true) {
+            String username = Screen.getString("Enter - or new username: ").toLowerCase();
+            if (!Application.isForUpdate(username))
+                break;
+
+            if (employeeService.findByUsername(new Employee().setUsername(username)) == null)
+                employee1.setUsername(username.trim());
+
+            System.out.println("Username already exists!");
         }
-        if (nationalCode > 0) {
-            employee1.setNationalCode(nationalCode);
-        }
-        if (Application.isForUpdate(username)) {
-            employee1.setUsername(username.trim());
-        }
-        if (Application.isForUpdate(password)) {
+
+        String password = Screen.getPassword("Enter - or new password: ");
+        if (Application.isForUpdate(password))
             employee1.setUsername(password.trim());
-        }
+
+        EmployeeRole role = selectRole("Select new role from menu: ");
+        if (role != null)
+            employee1.setRole(role);
+
+        this.employee = selectEmployee("Select new manager from menu: ");
+        if (!employee.isNew())
+            employee1.setManager(this.employee);
+
+        BranchConsole branchConsole = BranchConsole.getInstance();
+        Branch branch = branchConsole.selectBranch("Select new branch from menu: ");
+        if (!branch.isNew())
+            employee1.setBranch(branch);
 
         employeeService.update(employee1);
-
     }
 
     private void deleteEmployee() {
         Employee employee1 = selectEmployee("Select employee to delete: ");
+        if (employee1.isNew())
+            return;
         employeeService.delete(employee1);
     }
 

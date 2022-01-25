@@ -14,8 +14,26 @@ import java.util.Set;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Customer extends Person{
+public class Customer extends BaseEntity {
 
+    private String firstname;
+    private String lastname;
+    private Long nationalCode;
     private Set<Account> accounts = new HashSet<>();
 
+    @Override
+    public Customer setId(Long id) {
+        super.setId(id);
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "{ " +
+               "id=" + getId() +
+               ", firstname='" + firstname + '\'' +
+               ", lastname='" + lastname + '\'' +
+               ", nationalCode=" + nationalCode +
+               " }";
+    }
 }

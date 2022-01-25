@@ -42,8 +42,13 @@ public class DatabaseConnection {
     }
 
     private void setConnection() {
+        String database = "javid_bank_system";
+        String url = "jdbc:postgresql://localhost:5432/" + database;
+        String user = "postgres";
+        String password = "123";
+
         try {
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/bank_system", "postgres", "123");
+            connection = DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
             e.printStackTrace();
         }

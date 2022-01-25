@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class EmployeeService {
 
-    private EmployeeRepository repository = new EmployeeRepositoryImpl();
+    private final EmployeeRepository repository = new EmployeeRepositoryImpl();
 
     public List<Employee> findAll() {
         return repository.findAll();
@@ -30,5 +30,9 @@ public class EmployeeService {
     public void delete(Employee employee) {
         if (!employee.isNew())
             repository.deleteById(employee.getId());
+    }
+
+    public Employee findByUsername(Employee employee) {
+        return repository.findByUsername(employee);
     }
 }

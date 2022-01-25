@@ -1,10 +1,10 @@
 package com.javid.repository.jdbc;
 
 import com.javid.database.DatabaseConnection;
-import com.javid.model.Bank;
 import com.javid.model.Branch;
 import com.javid.model.Employee;
 import com.javid.repository.BranchRepository;
+import com.javid.repository.PrimitiveHandler;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -17,6 +17,15 @@ import java.util.List;
 public class BranchRepositoryImpl implements BranchRepository {
 
     private Connection connection;
+    private static final String ID = "id";
+    private static final String NAME = "name";
+    private static final String MANAGER_ID = "manager_id";
+    private static final String SELECT_QUERY = """
+            SELECT id, name, manager_id
+            FROM branch
+            WHERE 1=1
+            %s;""";
+
 
     public void setConnection() {
         this.connection = DatabaseConnection.getInstance().getConnection();
@@ -26,32 +35,12 @@ public class BranchRepositoryImpl implements BranchRepository {
     public List<Branch> findAll() {
         setConnection();
         List<Branch> branches = new ArrayList<>();
-        String query = """
-                SELECT id
-                     , name
-                     , manager_id
-                     , bank_id
-                FROM branch;
-                """;
+        String query = SELECT_QUERY.formatted("ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Employee branchManager = new Employee();
-                branchManager.setId(resultSet.getLong("manager_id"));
-
-                Bank bank = new Bank();
-                bank.setId(resultSet.getLong("bank_id"));
-
-                Branch branch = new Branch()
-                        .setManager(branchManager)
-                        .setBank(bank);
-                branch.setId(resultSet.getLong("id"));
-                branch.setName(resultSet.getString("name"));
-
-                branches.add(branch);
+                branches.add(parseBranch(resultSet));
             }
-
-            return branches;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -62,70 +51,40 @@ public class BranchRepositoryImpl implements BranchRepository {
     @Override
     public Branch findById(Long id) {
         setConnection();
-        Branch branch = new Branch();
-        String query = """
-                SELECT id
-                     , name
-                     , manager_id
-                     , bank_id
-                FROM branch
-                WHERE id = ?;
-                """;
+        String query = SELECT_QUERY.formatted("""
+                AND id = ?
+                ORDER BY id""");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                Employee branchManager = new Employee();
-                branchManager.setId(resultSet.getLong("manager_id"));
-
-                Employee bankManager = new Employee();
-                bankManager.setId(resultSet.getLong("bank_manager_id"));
-
-                Bank bank = new Bank();
-                bank.setId(resultSet.getLong("bank_id"));
-                bank.setName(resultSet.getString("bank_name"));
-                bank.setManager(bankManager);
-
-                branch.setManager(branchManager)
-                        .setBank(bank);
-                branch.setId(resultSet.getLong("id"));
-                branch.setName(resultSet.getString("nam"));
+                return parseBranch(resultSet);
             }
-
-            return branch;
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return branch;
+        return null;
     }
 
     @Override
     public Long save(Branch entity) {
         setConnection();
         String query = """
-                INSERT INTO branch(name, bank_id, manager_id)
-                values (?, ?, ?);
+                INSERT INTO branch(name, manager_id)
+                values (?, ?);
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, entity.getName());
-            if (entity.getBank() == null || entity.getBank().isNew()) {
-                statement.setNull(2, Types.BIGINT);
-            } else {
-                statement.setLong(2, entity.getBank().getId());
-            }
 
-            if (entity.getManager() == null || entity.getManager().isNew()) {
-                statement.setNull(3, Types.BIGINT);
-            } else {
-                statement.setLong(3, entity.getManager().getId());
-            }
+            PrimitiveHandler.setLong(statement, entity.getManager() == null || entity.getManager().isNew()
+                    , 2, () -> entity.getManager().getId());
+
             statement.execute();
             ResultSet resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
                 return resultSet.getLong("id");
             }
-            return null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -154,28 +113,30 @@ public class BranchRepositoryImpl implements BranchRepository {
         String query = """
                 UPDATE branch
                 SET name=?,
-                    bank_id=?,
                     manager_id=?
                 WHERE id=?;
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, entity.getName());
-            if (entity.getBank() == null || entity.getBank().isNew()) {
-                statement.setNull(2, Types.BIGINT);
-            } else {
-                statement.setLong(2, entity.getBank().getId());
-            }
 
-            if (entity.getManager() == null || entity.getManager().isNew()) {
-                statement.setNull(3, Types.BIGINT);
-            } else {
-                statement.setLong(3, entity.getManager().getId());
-            }
+            PrimitiveHandler.setLong(statement, entity.getManager() == null || entity.getManager().isNew()
+                    , 2, () -> entity.getManager().getId());
 
-            statement.setLong(4, entity.getId());
+            statement.setLong(3, entity.getId());
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private Branch parseBranch(ResultSet resultSet) throws SQLException {
+        long managerId = resultSet.getLong(MANAGER_ID);
+        Employee branchManager = new Employee()
+                .setId(resultSet.wasNull() ? null : managerId);
+
+        return new Branch()
+                .setId(resultSet.getLong(ID))
+                .setName(resultSet.getString(NAME))
+                .setManager(branchManager);
     }
 }

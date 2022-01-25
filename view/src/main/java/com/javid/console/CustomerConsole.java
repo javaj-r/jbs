@@ -1,7 +1,10 @@
 package com.javid.console;
 
+import com.javid.Application;
 import com.javid.model.Customer;
 import com.javid.service.CustomerService;
+import com.javid.service.ForeignKeyViolationException;
+import com.javid.service.NationalCodeValidationException;
 import com.javid.util.Screen;
 
 import java.util.List;
@@ -51,7 +54,7 @@ public class CustomerConsole {
     public void selectCustomer() {
         Customer customer1 = selectCustomer("Select from menu: ");
 
-        if (!customer.isNew()) {
+        if (!customer1.isNew()) {
             customer = customer1;
         }
     }
@@ -73,26 +76,68 @@ public class CustomerConsole {
     }
 
     private void createCustomer() {
-        String firstname = Screen.getString("Enter firstname: ");
-        String lastname = Screen.getString("Enter lastname: ");
-        Long nationalCode = Screen.getLong("Enter national cold: ", "Invalid number.");
-
-        Customer customer1 = new Customer();
-        customer1.setFirstname(firstname)
-                .setLastname(lastname)
-                .setNationalCode(nationalCode);
-        customer1 = customerService.create(customer1);
+        Customer customer1 = new Customer()
+                .setFirstname(Screen.getString("Enter firstname: "))
+                .setLastname(Screen.getString("Enter lastname: "));
+        while (true) {
+            try {
+                customer1.setNationalCode(
+                        Screen.getLong("Enter national cold: ", "Invalid number."));
+                customer1 = customerService.create(customer1);
+                break;
+            } catch (NationalCodeValidationException e) {
+                Screen.printError(e.getMessage(), 500);
+            }
+            int choice = Screen.showMenu("", ""
+                    , "Select from menu: ", "Invalid choice."
+                    , "Cancel", "Try another code");
+            if (choice == 0)
+                return;
+        }
         if (!customer1.isNew()) {
             customer = customer1;
         }
     }
 
     private void updateCustomer() {
+        Customer customer1 = selectCustomer("Select customer to update: ");
+        if (customer1.isNew())
+            return;
 
+        String firstname = Screen.getString("Enter - or new firstname: ");
+        if (Application.isForUpdate(firstname))
+            customer1.setFirstname(firstname);
+
+        String lastname = Screen.getString("Enter - or new lastname: ");
+        if (Application.isForUpdate(lastname))
+            customer1.setLastname(lastname);
+
+        while (true) {
+            try {
+                long nationalCode = Screen.getLong("Enter 0 or new national cold: ", "Invalid number.");
+                if (nationalCode != 0)
+                    customer1.setNationalCode(nationalCode);
+                customerService.update(customer1);
+                break;
+            } catch (NationalCodeValidationException e) {
+                Screen.printError(e.getMessage(), 500);
+            }
+            int choice = Screen.showMenu("", ""
+                    , "Select from menu: ", "Invalid choice."
+                    , "Cancel", "Try another code");
+            if (choice == 0)
+                return;
+        }
     }
 
     private void deleteCustomer() {
         Customer customer1 = selectCustomer("Select customer to delete: ");
-        customerService.delete(customer1);
+        if (customer1.isNew())
+            return;
+        try {
+            customerService.delete(customer1);
+        } catch (ForeignKeyViolationException e) {
+            Screen.printError(e.getMessage(), 500);
+        }
     }
 }

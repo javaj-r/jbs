@@ -10,5 +10,11 @@ import java.sql.Date;
  */
 public interface CardRepository extends CrudRepository<Card, Long> {
 
+    Date getCurrentDate();
+
     Date getExpireDate(int year);
+
+    Date getExpireDate(Date date);
+
+    Card findByCardNumber(Long cardNumber);
 }

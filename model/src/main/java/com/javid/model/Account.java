@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -20,15 +21,21 @@ public class Account extends BaseEntity {
     private Card card;
     private Long balance;
     private boolean enabled;
-    private Set<Transaction> transactions;
+    private Set<Transaction> transactions = new HashSet<>();
+
+    @Override
+    public Account setId(Long id) {
+        super.setId(id);
+        return this;
+    }
 
     @Override
     public String toString() {
         return "{ " +
                 "id=" + getId() +
-                ", branchId=" + (branch == null ? "no branch": branch.getId()) +
-                ", customerId=" + (customer == null? "no customer" : customer.getId()) +
-                ", cardId=" + (card == null? "no card" : card.getId()) +
+                ", branchId=" + (branch == null ? "'no branch'": branch.getId()) +
+                ", customerId=" + (customer == null? "'no customer'" : customer.getId()) +
+                ", cardId=" + (card == null? "'no card'" : card.getId()) +
                 ", balance=" + balance +
                 ", enabled=" + enabled +
                 " }";

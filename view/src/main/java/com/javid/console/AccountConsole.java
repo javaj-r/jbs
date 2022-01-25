@@ -3,7 +3,9 @@ package com.javid.console;
 import com.javid.model.Account;
 import com.javid.model.Branch;
 import com.javid.model.Customer;
+import com.javid.service.AccountBalanceException;
 import com.javid.service.AccountService;
+import com.javid.service.CustomerService;
 import com.javid.util.Screen;
 
 import java.util.List;
@@ -16,6 +18,7 @@ public class AccountConsole {
 
     private Account account;
     private final AccountService accountService;
+    private final CustomerService customerService;
 
     private static class Singleton {
         private static final AccountConsole INSTANCE = new AccountConsole();
@@ -27,17 +30,19 @@ public class AccountConsole {
 
     private AccountConsole() {
         accountService = new AccountService();
+        customerService = new CustomerService();
     }
 
     public void mainMenu() {
         while (true) {
             int choice = Screen.showMenu("", "", "Select from menu: ", "Invalid choice."
                     , "Back to main"
-                    , "Select branch"
-                    , "Create branch"
-                    , "Update branch"
-                    , "Delete branch"
-                    , "Get customer accounts");
+                    , "Select account"
+                    , "Create account"
+                    , "Update account"
+                    , "Delete account"
+                    , "Get customer accounts"
+                    , "Get customer accounts fast");
 
             if (choice == 0)
                 break;
@@ -47,22 +52,39 @@ public class AccountConsole {
                 case 2 -> createAccount();
                 case 3 -> updateAccount();
                 case 4 -> deleteAccount();
-                case 5 -> showCustomerAccounts();
-
+                case 5 -> showCustomerAccountsById();
+                case 6 -> showCustomerAccounts();
             }
         }
     }
 
+    private void showCustomerAccountsById() {
+        Customer customer;
+        while (true) {
+            long id = Screen.getLong("Enter 0 or customer id to get accounts: ", "Invalid number");
+            if (id == 0)
+                return;
+            customer = customerService.findById(id);
+            if (customer != null)
+                break;
+            System.out.println("No customer with id " + id);
+        }
+        showCustomerAccounts(customer);
+    }
+
     private void showCustomerAccounts() {
         Customer customer = CustomerConsole.getInstance().selectCustomer("Select customer: ");
-        if (customer.isNew())
+        showCustomerAccounts(customer);
+    }
+
+    private void showCustomerAccounts(Customer customer) {
+        if (customer == null || customer.isNew())
             return;
 
-        List<Account> list = accountService.findAll(customer);
+        List<Account> list = accountService.findAllByCustomerId(customer);
         if (list.isEmpty()) {
             System.out.println("No account found!");
         }
-
         list.forEach(System.out::println);
     }
 
@@ -100,19 +122,26 @@ public class AccountConsole {
         if (branch.isNew())
             return;
 
-        Long balance = Screen.getLong("Enter start balance: ", "Invalid number.");
-        if (balance < 0) {
-            Screen.printError("Balance cannot be negative!");
-            return;
-        }
-
         Account account1 = new Account()
                 .setEnabled(true)
                 .setCustomer(customer)
-                .setBranch(branch)
-                .setBalance(balance);
+                .setBranch(branch);
 
-        account1 = accountService.create(account1);
+        int choice;
+        do {
+            try {
+                account1.setBalance(
+                        Screen.getLong("Enter start balance: ", "Invalid number."));
+                account1 = accountService.create(account1);
+                break;
+            } catch (AccountBalanceException e) {
+                Screen.printError(e.getMessage(), 2000);
+            }
+            choice = Screen.showMenu("", ""
+                    , "Select from menu: ", "Invalid choice."
+                    , "Cancel", "Try another balance");
+        } while (choice != 0);
+
         if (!account1.isNew()) {
             account = account1;
         }
@@ -127,7 +156,25 @@ public class AccountConsole {
                 , "Disable account.", "Enable account.");
 
         account1.setEnabled(choice != 0);
-        accountService.update(account1);
+
+        BranchConsole branchConsole = BranchConsole.getInstance();
+        Branch branch = branchConsole.selectBranch("Select new branch from menu: ");
+        if (!branch.isNew())
+            account1.setBranch(branch);
+
+        do {
+            try {
+                account1.setBalance(
+                        Screen.getLong("Enter 0 or new balance: ", "Invalid number."));
+                accountService.update(account1);
+                break;
+            } catch (AccountBalanceException e) {
+                Screen.printError(e.getMessage(), 2000);
+            }
+            choice = Screen.showMenu("", ""
+                    , "Select from menu: ", "Invalid choice."
+                    , "Cancel", "Try another balance");
+        } while (choice != 0);
     }
 
     private void deleteAccount() {

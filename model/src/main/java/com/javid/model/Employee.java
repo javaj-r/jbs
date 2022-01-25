@@ -11,24 +11,29 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Employee extends Person {
+public class Employee extends BaseEntity {
 
     private String username;
     private String password;
+    private EmployeeRole role;
     private Employee manager;
     private Branch branch;
 
     @Override
+    public Employee setId(Long id) {
+        super.setId(id);
+        return this;
+    }
+
+    @Override
     public String toString() {
         return "{ " +
-                "id=" + getId() +
-                ", firstname='" + getFirstname() + '\'' +
-                ", lastname='" + getLastname() + '\'' +
-                ", nationalCode='" + getNationalCode() + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", managerId=" + (manager == null ? "no manager" : manager.getId()) +
-                ", branchId=" + (branch == null ? "no branch" : branch.getId()) +
-                " }";
+               "id=" + getId() +
+               ", username='" + username + '\'' +
+               ", password='" + password + '\'' +
+               ", Role=" + (role == null ? null : role.name()) +
+               ", managerId=" + (manager == null ? "'no manager'" : manager.getId()) +
+               ", branchId=" + (branch == null ? "'no branch'" : branch.getId()) +
+               " }";
     }
 }

@@ -6,6 +6,7 @@ import com.javid.model.Branch;
 import com.javid.model.Card;
 import com.javid.model.Customer;
 import com.javid.repository.AccountRepository;
+import com.javid.repository.PrimitiveHandler;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -18,6 +19,18 @@ import java.util.List;
 public class AccountRepositoryImpl implements AccountRepository {
 
     private Connection connection;
+    private static final String ID = "id";
+    private static final String BALANCE = "balance";
+    private static final String ENABLED = "enabled";
+    private static final String BRANCH_ID = "branch_id";
+    private static final String CARD_ID = "card_id";
+    private static final String CUSTOMER_ID = "customer_id";
+    private static final String SELECT_QUERY = """
+            SELECT id, enabled, balance, customer_id, branch_id, card_id
+            FROM account
+            WHERE 1=1
+            %s;""";
+
 
     public void setConnection() {
         this.connection = DatabaseConnection.getInstance().getConnection();
@@ -27,39 +40,12 @@ public class AccountRepositoryImpl implements AccountRepository {
     public List<Account> findAll() {
         setConnection();
         List<Account> accounts = new ArrayList<>();
-        String query = """
-                SELECT id
-                     , balance
-                     , enabled
-                     , branch_id
-                     , card_id
-                     , customer_id
-                FROM account;
-                """;
+        String query = SELECT_QUERY.formatted("ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Branch branch = new Branch();
-                branch.setId(resultSet.getLong("branch_id"));
-
-                Card card = new Card();
-                card.setId(resultSet.getLong("card_id"));
-
-                Customer customer = new Customer();
-                customer.setId(resultSet.getLong("customer_id"));
-
-                Account account = new Account()
-                        .setBalance(resultSet.getLong("balance"))
-                        .setEnabled(resultSet.getBoolean("enabled"))
-                        .setBranch(branch)
-                        .setCard(card)
-                        .setCustomer(customer);
-                account.setId(resultSet.getLong("id"));
-
-                accounts.add(account);
+                accounts.add(parseAccount(resultSet));
             }
-
-            return accounts;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -69,64 +55,49 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public Account findById(Long id) {
         setConnection();
-        Account account = new Account();
-        String query = """
-                SELECT id
-                     , balance
-                     , enabled
-                     , branch_id
-                     , card_id
-                     , customer_id
-                FROM account
-                WHERE id = ?;
-                """;
+        String query = SELECT_QUERY.formatted("""
+                AND id = ?
+                ORDER BY id""");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                Branch branch = new Branch();
-                branch.setId(resultSet.getLong("branch_id"));
-
-                Card card = new Card();
-                card.setId(resultSet.getLong("card_id"));
-
-                Customer customer = new Customer();
-                customer.setId(resultSet.getLong("customer_id"));
-
-                account.setBalance(resultSet.getLong("balance"))
-                        .setEnabled(resultSet.getBoolean("enabled"))
-                        .setBranch(branch)
-                        .setCard(card)
-                        .setCustomer(customer);
-                account.setId(resultSet.getLong("id"));
+                return parseAccount(resultSet);
             }
-
-            return account;
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return account;
+        return null;
     }
 
     @Override
     public Long save(Account entity) {
         setConnection();
         String query = """
-                INSERT INTO account(enabled, balance, customer_id, branch_id)
-                values (?, ?, ?, ?);
+                INSERT INTO account(enabled, balance, customer_id, branch_id, card_id)
+                values (?, ?, ?, ?, ?);
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             statement.setBoolean(1, entity.isEnabled());
-            statement.setLong(2, entity.getBalance());
-            statement.setLong(3, entity.getCustomer().getId());
-            statement.setLong(4, entity.getBranch().getId());
+
+            boolean isNull = entity.getBalance() == null;
+            PrimitiveHandler.setLong(statement, isNull, 2, entity::getBalance);
+
+            isNull = entity.getCustomer() == null || entity.getCustomer().isNew();
+            PrimitiveHandler.setLong(statement, isNull, 3, () -> entity.getCustomer().getId());
+
+            isNull = entity.getBranch() == null || entity.getBranch().isNew();
+            PrimitiveHandler.setLong(statement, isNull, 4, () -> entity.getBranch().getId());
+
+            isNull = entity.getCard() == null || entity.getCard().isNew();
+            PrimitiveHandler.setLong(statement, isNull, 5, () -> entity.getCard().getId());
+
             statement.execute();
             ResultSet resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
-                return resultSet.getLong("id");
+                return resultSet.getLong(ID);
             }
-            return null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -156,22 +127,70 @@ public class AccountRepositoryImpl implements AccountRepository {
                 UPDATE account
                 SET enabled=?,
                     balance=?,
+                    customer_id=?,
+                    branch_id=?,
                     card_id=?
                 WHERE id=?;
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBoolean(1, entity.isEnabled());
-            statement.setLong(2, entity.getBalance());
-            if (entity.getCard() == null || entity.getCard().isNew()) {
-                statement.setNull(3, Types.BIGINT);
-            } else {
-                statement.setLong(3, entity.getCard().getId());
-            }
-            statement.setLong(4, entity.getId());
+
+            boolean isNull = entity.getBalance() == null;
+            PrimitiveHandler.setLong(statement, isNull, 2, entity::getBalance);
+
+            isNull = entity.getCustomer() == null || entity.getCustomer().isNew();
+            PrimitiveHandler.setLong(statement, isNull, 3, () -> entity.getCustomer().getId());
+
+            isNull = entity.getBranch() == null || entity.getBranch().isNew();
+            PrimitiveHandler.setLong(statement, isNull, 4, () -> entity.getBranch().getId());
+
+            isNull = entity.getCard() == null || entity.getCard().isNew();
+            PrimitiveHandler.setLong(statement, isNull, 5, () -> entity.getCard().getId());
+            statement.setLong(6, entity.getId());
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
+    @Override
+    public List<Account> findAllByCustomerId(Long customerId) {
+        setConnection();
+        List<Account> accounts = new ArrayList<>();
+        String query = SELECT_QUERY.formatted("""
+                AND customer_id = ?
+                ORDER BY id""");
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setLong(1, customerId);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                accounts.add(parseAccount(resultSet));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return accounts;
+    }
+
+    private Account parseAccount(ResultSet resultSet) throws SQLException {
+        long tempId = resultSet.getLong(BRANCH_ID);
+        Branch branch = new Branch()
+                .setId(resultSet.wasNull() ? null : tempId);
+
+        tempId = resultSet.getLong(CARD_ID);
+        Card card = new Card()
+                .setId(resultSet.wasNull() ? null : tempId);
+
+        tempId = resultSet.getLong(CUSTOMER_ID);
+        Customer customer = new Customer()
+                .setId(resultSet.wasNull() ? null : tempId);
+
+        return new Account()
+                .setId(resultSet.getLong(ID))
+                .setBalance(resultSet.getLong(BALANCE))
+                .setEnabled(resultSet.getBoolean(ENABLED))
+                .setBranch(branch)
+                .setCustomer(customer)
+                .setCard(card);
     }
 }

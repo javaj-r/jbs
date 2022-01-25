@@ -28,8 +28,7 @@ public class Screen {
         throw new IllegalStateException("Utility class");
     }
 
-    private static String getComputerName()
-    {
+    private static String getComputerName() {
         Map<String, String> env = System.getenv();
         if (env.containsKey("COMPUTERNAME"))
             return env.get("COMPUTERNAME");
@@ -37,7 +36,6 @@ public class Screen {
     }
 
     public static int showMenu(String header, String footer, String message, String errorMessage, String zeroItem, String... items) {
-        clearScreen();
         int counter = 1;
         StringBuilder builder = new StringBuilder(header).append("\n");
         for (String item : items) {
@@ -59,15 +57,34 @@ public class Screen {
     }
 
     public static String getStingDate(String message, String errorMessage) {
+        Date date = getDate(message, errorMessage);
+        return date == null ? null : date.toString();
+    }
+
+    public static Date getDate(String message, String errorMessage) {
         System.out.print(message);
         while (true) {
-        System.out.println("Accepted format is yyyy-[m]m-[d]d");
+            System.out.println("Accepted format is yyyy-[m]m-[d]d");
             try {
                 String s = SCANNER.nextLine().trim();
                 if (s.isEmpty())
                     return null;
-                Date date = Date.valueOf(s);
-                return date.toString();
+                return Date.valueOf(s);
+            } catch (IllegalArgumentException e) {
+                printError(errorMessage);
+            }
+        }
+    }
+
+    public static Date getFirstDayOfMonth(String message, String errorMessage) {
+        System.out.print(message);
+        while (true) {
+            System.out.println("Accepted format is yyyy-[m]m");
+            try {
+                String s = SCANNER.nextLine().trim() + "-1";
+                if (s.isEmpty())
+                    return null;
+                return Date.valueOf(s);
             } catch (IllegalArgumentException e) {
                 printError(errorMessage);
             }
@@ -77,10 +94,10 @@ public class Screen {
     public static String getStringTime(String message, String errorMessage) {
         System.out.print(message);
         while (true) {
-        System.out.println("Accepted format is hh:mm");
+            System.out.println("Accepted format is hh:mm");
             try {
                 String s = SCANNER.nextLine().trim();
-                Time time = Time.valueOf(s+":00");
+                Time time = Time.valueOf(s + ":00");
                 return time.toString();
             } catch (IllegalArgumentException e) {
                 printError(errorMessage);
@@ -90,7 +107,7 @@ public class Screen {
 
     public static String getString(String message) {
         System.out.print(message);
-        return SCANNER.nextLine();
+        return SCANNER.nextLine().trim();
     }
 
     public static String getPassword(String message) {

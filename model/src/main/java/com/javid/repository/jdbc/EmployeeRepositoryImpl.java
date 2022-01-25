@@ -3,7 +3,9 @@ package com.javid.repository.jdbc;
 import com.javid.database.DatabaseConnection;
 import com.javid.model.Branch;
 import com.javid.model.Employee;
+import com.javid.model.EmployeeRole;
 import com.javid.repository.EmployeeRepository;
+import com.javid.repository.PrimitiveHandler;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,8 +18,19 @@ import java.util.List;
 public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     private Connection connection;
+    private static final String ID = "id";
+    private static final String ROLE = "role";
+    private static final String USERNAME = "username";
+    private static final String PASSWORD = "password";
+    private static final String BRANCH_ID = "branch_id";
+    private static final String MANAGER_ID = "manager_id";
+    private static final String SELECT_QUERY = """
+            SELECT id, username, password, branch_id, manager_id, role
+            FROM employee
+            WHERE 1=1
+            %s;""";
 
-    public void setConnection() {
+    private void setConnection() {
         this.connection = DatabaseConnection.getInstance().getConnection();
     }
 
@@ -25,33 +38,12 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     public List<Employee> findAll() {
         setConnection();
         List<Employee> employees = new ArrayList<>();
-        String query = """
-                SELECT e.id, e.username, e.password, p.firstname, p.lastname, p.national_code, e.branch_id, e.manager_id
-                FROM employee e
-                         LEFT JOIN person p on p.id = e.person_id;
-                """;
+        String query = SELECT_QUERY.formatted("ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Branch branch = new Branch();
-                branch.setId(resultSet.getLong("branch_id"));
-
-                Employee manager = new Employee();
-                manager.setId(resultSet.getLong("manager_id"));
-
-                Employee employee = new Employee()
-                        .setUsername(resultSet.getString("username"))
-                        .setPassword(resultSet.getString("password"))
-                        .setBranch(branch)
-                        .setManager(manager);
-                employee.setFirstname(resultSet.getString("firstname"))
-                        .setLastname(resultSet.getString("lastname"))
-                        .setNationalCode(resultSet.getLong("national_code"));
-                employee.setId(resultSet.getLong("id"));
-
-                employees.add(employee);
+                employees.add(parseEmployee(resultSet));
             }
-            return employees;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -61,86 +53,45 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     @Override
     public Employee findById(Long id) {
-
         setConnection();
-        Employee employee = new Employee();
-        String query = """
-                SELECT e.id, e.username, e.password, p.firstname, p.lastname, p.national_code, e.branch_id, e.manager_id
-                FROM employee e
-                         LEFT JOIN person p on p.id = e.person_id
-                WHERE e.id = ?;
-                """;
+        String query = SELECT_QUERY.formatted("""
+                AND id = ?
+                ORDER BY id""");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                Branch branch = new Branch();
-                branch.setId(resultSet.getLong("branch_id"));
-
-                Employee manager = new Employee();
-                manager.setId(resultSet.getLong("manager_id"));
-
-                employee.setUsername(resultSet.getString("username"))
-                        .setPassword(resultSet.getString("password"))
-                        .setBranch(branch)
-                        .setManager(manager);
-                employee.setFirstname(resultSet.getString("firstname"))
-                        .setLastname(resultSet.getString("lastname"))
-                        .setNationalCode(resultSet.getLong("national_code"));
-                employee.setId(resultSet.getLong("id"));
+                return parseEmployee(resultSet);
             }
-
-            return employee;
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return employee;
+        return null;
     }
 
     @Override
     public Long save(Employee entity) {
         setConnection();
         String query = """
-                WITH data(person_id) AS (
-                    INSERT INTO person (firstname, lastname, national_code)
-                        VALUES (?, ?, ?)
-                        RETURNING id
-                )
                 INSERT
-                INTO employee(username, password, person_id, branch_id, manager_id)
-                SELECT d.person_id, ?, ?, ?, ?
-                FROM data d;
+                INTO employee(username, password, branch_id, manager_id, role)
+                VALUES (?, ?, ?, ?, ?::employee_role);
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, entity.getFirstname());
-            statement.setString(2, entity.getLastname());
-            if (entity.getNationalCode() == null) {
-                statement.setNull(3, Types.BIGINT);
-            } else {
-                statement.setLong(3, entity.getNationalCode());
-            }
+            statement.setString(1, entity.getUsername());
+            statement.setString(2, entity.getPassword());
+            PrimitiveHandler.setLong(statement, entity.getBranch() == null || entity.getBranch().isNew()
+                    , 3, () -> entity.getBranch().getId());
+            PrimitiveHandler.setLong(statement, entity.getManager() == null || entity.getManager().isNew()
+                    , 4, () -> entity.getManager().getId());
+            statement.setString(5, entity.getRole() == null ? null : entity.getRole().name());
 
-            statement.setString(4, entity.getUsername());
-            statement.setString(5, entity.getPassword());
-
-            if (entity.getBranch() == null || entity.getBranch().isNew()) {
-                statement.setNull(6, Types.BIGINT);
-            } else {
-                statement.setLong(6, entity.getBranch().getId());
-            }
-
-            if (entity.getManager() == null || entity.getManager().isNew()) {
-                statement.setNull(7, Types.BIGINT);
-            } else {
-                statement.setLong(7, entity.getManager().getId());
-            }
             statement.execute();
             ResultSet resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
-                return resultSet.getLong("id");
+                return resultSet.getLong(ID);
             }
-            return null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -152,10 +103,6 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     public void deleteById(Long id) {
         setConnection();
         String query = """
-                DELETE
-                FROM person
-                WHERE id=(SELECT e.person_id FROM employee e WHERE e.id = ?);
-                                
                 DELETE
                 FROM employee
                 WHERE id = ?
@@ -172,46 +119,81 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     public void update(Employee entity) {
         setConnection();
         String query = """
-                UPDATE person
-                SET firstname=?,
-                    lastname=?,
-                    national_code=?
-                WHERE id = (SELECT person_id FROM employee e WHERE e.id = ?);
-                                
                 UPDATE employee
                 SET username=?,
                     password=?,
                     branch_id=?,
-                    manager_id=?
+                    manager_id=?,
+                    role=?::employee_role
                 WHERE id=?;
                 """;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, entity.getFirstname());
-            statement.setString(2, entity.getLastname());
-            if (entity.getNationalCode() == null) {
-                statement.setNull(3, Types.BIGINT);
-            } else {
-                statement.setLong(3, entity.getNationalCode());
-            }
-            statement.setLong(4, entity.getId());
-            statement.setString(5, entity.getUsername());
-            statement.setString(6, entity.getPassword());
-
-            if (entity.getBranch() == null || entity.getBranch().isNew()) {
-                statement.setNull(7, Types.BIGINT);
-            } else {
-                statement.setLong(7, entity.getBranch().getId());
-            }
-
-            if (entity.getManager() == null || entity.getManager().isNew()) {
-                statement.setNull(8, Types.BIGINT);
-            } else {
-                statement.setLong(8, entity.getManager().getId());
-            }
-            statement.setLong(9, entity.getId());
+            statement.setString(1, entity.getUsername());
+            statement.setString(2, entity.getPassword());
+            PrimitiveHandler.setLong(statement, entity.getBranch() == null || entity.getBranch().isNew()
+                    , 3, () -> entity.getBranch().getId());
+            PrimitiveHandler.setLong(statement, entity.getManager() == null || entity.getManager().isNew()
+                    , 4, () -> entity.getManager().getId());
+            statement.setString(5, entity.getRole() == null ? null : entity.getRole().name());
+            statement.setLong(6, entity.getId());
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Employee findByUsername(Employee entity) {
+        setConnection();
+        String query = SELECT_QUERY.formatted("AND username = ?");
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, entity.getUsername());
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return parseEmployee(resultSet);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Employee findByUsernamePassword(Employee entity) {
+        setConnection();
+        String query = SELECT_QUERY.formatted("""
+                AND username = ?
+                AND password = ?""");
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, entity.getUsername());
+            statement.setString(2, entity.getPassword());
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return parseEmployee(resultSet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Employee parseEmployee(ResultSet resultSet) throws SQLException {
+        long tempId = resultSet.getLong(BRANCH_ID);
+        Branch branch = new Branch()
+                .setId(resultSet.wasNull() ? null : tempId);
+
+        tempId = resultSet.getLong(MANAGER_ID);
+        Employee manager = new Employee()
+                .setId(resultSet.wasNull() ? null : tempId);
+
+        String role = resultSet.getString(ROLE);
+
+        return new Employee().setId(resultSet.getLong(ID))
+                .setUsername(resultSet.getString(USERNAME))
+                .setPassword(resultSet.getString(PASSWORD))
+                .setRole(role == null ? null : EmployeeRole.valueOf(role))
+                .setBranch(branch)
+                .setManager(manager);
     }
 }
