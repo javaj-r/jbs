@@ -17,7 +17,7 @@ public class AccountService {
 
     private final AccountRepository repository = new AccountRepositoryImpl();
 
-    public List<Account> findAll(Customer customer) {
+    public List<Account> findAllByCustomerId(Customer customer) {
         if (customer.isNew())
             return new ArrayList<>();
 
@@ -34,11 +34,12 @@ public class AccountService {
     }
 
     public Account create(Account account) {
-        account.setId(repository.save(account));
-        return account;
+        validateBalance(account.getBalance());
+        return account.setId(repository.save(account));
     }
 
     public void update(Account account) {
+        validateBalance(account.getBalance());
         repository.update(account);
     }
 
@@ -50,4 +51,11 @@ public class AccountService {
         return repository.findById(id);
     }
 
+    private void validateBalance(Long balance) {
+        if (balance == null) {
+            throw new AccountBalanceException("Account balance cannot be null");
+        } else if (balance < 0) {
+            throw new AccountBalanceException("Account balance cannot be negative");
+        }
+    }
 }
