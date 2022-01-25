@@ -30,9 +30,10 @@ public class Customer extends BaseEntity {
     @Override
     public String toString() {
         return "{ " +
-                "firstname='" + firstname + '\'' +
-                ", lastname='" + lastname + '\'' +
-                ", nationalCode=" + nationalCode +
-                " }";
+               "id=" + getId() +
+               ", firstname='" + firstname + '\'' +
+               ", lastname='" + lastname + '\'' +
+               ", nationalCode=" + nationalCode +
+               " }";
     }
 }
