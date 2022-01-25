@@ -32,13 +32,13 @@ public class Transaction extends BaseEntity {
     @Override
     public String toString() {
         return "{ " +
-                "id=" + getId() +
-                ", amount=" + amount +
-                ", account=" + account +
-                ", time=" + time +
-                ", date=" + date +
-                ", type=" + (type == null ? null : type.name()) +
-                ", status=" + (status == null ? null : status.name()) +
-                " }";
+               "id=" + getId() +
+               ", amount=" + amount +
+               ", accountId=" + (account == null ? "'no account'" : account.getId()) +
+               ", time=" + time +
+               ", date=" + date +
+               ", type=" + (type == null ? null : type.name()) +
+               ", status=" + (status == null ? null : status.name()) +
+               " }";
     }
 }
