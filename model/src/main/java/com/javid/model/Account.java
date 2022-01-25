@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -20,7 +21,7 @@ public class Account extends BaseEntity {
     private Card card;
     private Long balance;
     private boolean enabled;
-    private Set<Transaction> transactions;
+    private Set<Transaction> transactions = new HashSet<>();
 
     @Override
     public Account setId(Long id) {

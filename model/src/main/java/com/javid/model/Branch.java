@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -17,7 +18,7 @@ public class Branch extends BaseEntity {
 
     private String name;
     private Employee manager;
-    private Set<Employee> employees;
+    private Set<Employee> employees = new HashSet<>();
 
     @Override
     public Branch setId(Long id) {
@@ -29,7 +30,7 @@ public class Branch extends BaseEntity {
     public String toString() {
         return "{ " +
                 "id=" + getId() +
-                ", name=" + getName() +
+                ", name='" + getName() + '\'' +
                 ", managerId=" + (manager == null ? "'no manager'" : manager.getId()) +
                 " }";
     }
