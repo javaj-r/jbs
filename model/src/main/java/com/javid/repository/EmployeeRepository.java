@@ -7,4 +7,8 @@ import com.javid.model.Employee;
  * Created on 1/16/2022
  */
 public interface EmployeeRepository extends CrudRepository<Employee, Long> {
+
+    Employee findByUsername(Employee entity);
+
+    Employee findByUsernamePassword(Employee entity);
 }
