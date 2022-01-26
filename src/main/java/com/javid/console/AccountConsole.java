@@ -1,9 +1,9 @@
 package com.javid.console;
 
+import com.javid.exception.AccountBalanceException;
 import com.javid.model.Account;
 import com.javid.model.Branch;
 import com.javid.model.Customer;
-import com.javid.service.AccountBalanceException;
 import com.javid.service.AccountService;
 import com.javid.service.CustomerService;
 import com.javid.util.Screen;

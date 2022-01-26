@@ -4,8 +4,8 @@ import com.javid.database.DatabaseConnection;
 import com.javid.model.Branch;
 import com.javid.model.Employee;
 import com.javid.model.EmployeeRole;
-import com.javid.repository.EmployeeRepository;
 import com.javid.repository.PrimitiveHandler;
+import com.javid.repository.EmployeeRepository;
 
 import java.sql.*;
 import java.util.ArrayList;

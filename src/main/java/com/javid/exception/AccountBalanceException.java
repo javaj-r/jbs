@@ -1,4 +1,4 @@
-package com.javid.service;
+package com.javid.exception;
 
 /**
  * @author javid

@@ -1,10 +1,10 @@
 package com.javid.console;
 
 import com.javid.Application;
+import com.javid.exception.ForeignKeyViolationException;
+import com.javid.exception.NationalCodeValidationException;
 import com.javid.model.Customer;
 import com.javid.service.CustomerService;
-import com.javid.service.ForeignKeyViolationException;
-import com.javid.service.NationalCodeValidationException;
 import com.javid.util.Screen;
 
 import java.util.List;

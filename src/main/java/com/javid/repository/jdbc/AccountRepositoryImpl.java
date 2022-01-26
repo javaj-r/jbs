@@ -5,8 +5,8 @@ import com.javid.model.Account;
 import com.javid.model.Branch;
 import com.javid.model.Card;
 import com.javid.model.Customer;
-import com.javid.repository.AccountRepository;
 import com.javid.repository.PrimitiveHandler;
+import com.javid.repository.AccountRepository;
 
 import java.sql.*;
 import java.util.ArrayList;

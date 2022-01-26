@@ -3,8 +3,8 @@ package com.javid.repository.jdbc;
 import com.javid.database.DatabaseConnection;
 import com.javid.model.Account;
 import com.javid.model.Card;
-import com.javid.repository.CardRepository;
 import com.javid.repository.PrimitiveHandler;
+import com.javid.repository.CardRepository;
 
 import java.sql.*;
 import java.util.ArrayList;
