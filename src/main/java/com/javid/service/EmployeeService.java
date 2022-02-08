@@ -2,7 +2,7 @@ package com.javid.service;
 
 import com.javid.model.Employee;
 import com.javid.repository.EmployeeRepository;
-import com.javid.repository.jdbc.EmployeeRepositoryImpl;
+import com.javid.repository.impl.EmployeeRepositoryImpl;
 
 import java.util.List;
 

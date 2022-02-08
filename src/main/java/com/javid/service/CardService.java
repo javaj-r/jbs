@@ -4,7 +4,7 @@ import com.javid.model.Account;
 import com.javid.model.Card;
 import com.javid.model.Transaction;
 import com.javid.repository.CardRepository;
-import com.javid.repository.jdbc.CardRepositoryImpl;
+import com.javid.repository.impl.CardRepositoryImpl;
 import com.javid.exception.CardNumberException;
 import com.javid.exception.AuthenticationException;
 

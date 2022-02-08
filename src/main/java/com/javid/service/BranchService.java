@@ -2,7 +2,7 @@ package com.javid.service;
 
 import com.javid.model.Branch;
 import com.javid.repository.BranchRepository;
-import com.javid.repository.jdbc.BranchRepositoryImpl;
+import com.javid.repository.impl.BranchRepositoryImpl;
 
 import java.util.List;
 
