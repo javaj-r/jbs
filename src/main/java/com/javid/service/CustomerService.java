@@ -2,9 +2,9 @@ package com.javid.service;
 
 import com.javid.model.Customer;
 import com.javid.repository.CustomerRepository;
-import com.javid.repository.impl.CustomerRepositoryImpl;
 import com.javid.exception.ForeignKeyViolationException;
 import com.javid.exception.NationalCodeValidationException;
+import com.javid.repository.hibernate.impl.CustomerRepositoryImpl;
 
 import java.util.List;
 
