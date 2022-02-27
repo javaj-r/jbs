@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,10 +17,15 @@ import java.util.Set;
 @Getter
 @Setter
 @Accessors(chain = true)
+@Entity
 public class Branch extends BaseEntity {
 
     private String name;
+
+    @OneToOne
     private Employee manager;
+
+    @OneToMany
     private Set<Employee> employees = new HashSet<>();
 
     @Override

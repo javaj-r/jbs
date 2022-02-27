@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import java.sql.Date;
 import java.sql.Time;
 
@@ -14,10 +17,13 @@ import java.sql.Time;
 @Getter
 @Setter
 @Accessors(chain = true)
+@Entity
 public class Transaction extends BaseEntity {
 
-    private Long amount;
+    @ManyToOne
     private Account account;
+
+    private Long amount;
     private Time time;
     private Date date;
     private TransactionType type;

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,13 +15,22 @@ import java.util.Set;
 @Getter
 @Setter
 @Accessors(chain = true)
+@Entity
 public class Account extends BaseEntity {
 
+    @OneToOne
     private Branch branch;
+
+    @ManyToOne
     private Customer customer;
+
+    @OneToOne
     private Card card;
+
     private Long balance;
     private boolean enabled;
+
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<Transaction> transactions = new HashSet<>();
 
     @Override
