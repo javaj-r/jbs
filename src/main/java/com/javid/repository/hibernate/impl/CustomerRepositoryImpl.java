@@ -5,6 +5,7 @@ import com.javid.model.Customer;
 import com.javid.repository.CustomerRepository;
 import org.hibernate.SessionFactory;
 
+import javax.persistence.NoResultException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,6 +87,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
             return session.createQuery("FROM Customer c WHERE c.nationalCode = :NationalCode", Customer.class)
                     .setParameter("NationalCode", entity.getNationalCode())
                     .getSingleResult();
+        } catch (NoResultException ignored) {
         } catch (Exception e) {
             e.printStackTrace();
         }
