@@ -4,9 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.sql.Date;
 
 /**
@@ -20,10 +18,15 @@ import java.sql.Date;
 public class Card extends BaseEntity {
 
     @OneToOne
+    @JoinColumn(name = "account_id")
     private Account account;
 
+    @Column(name = "card_number")
     private Long number;
+
+    @Column(name = "expire_date")
     private Date expireDate;
+
     private Integer cvv2;
     private Integer password1;
     private Integer password2;

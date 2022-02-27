@@ -19,18 +19,22 @@ import java.util.Set;
 public class Account extends BaseEntity {
 
     @OneToOne
+    @JoinColumn(name = "branch_id")
     private Branch branch;
 
     @ManyToOne
+    @JoinColumn(name = "customer_id")
     private Customer customer;
 
     @OneToOne
+    @JoinColumn(name = "card_id")
     private Card card;
 
     private Long balance;
     private boolean enabled;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @OneToMany
+    @JoinColumn(name = "account_id")
     private Set<Transaction> transactions = new HashSet<>();
 
     @Override

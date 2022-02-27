@@ -4,9 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.sql.Date;
 import java.sql.Time;
 
@@ -18,15 +16,25 @@ import java.sql.Time;
 @Setter
 @Accessors(chain = true)
 @Entity
+@Table(name = "transactions")
 public class Transaction extends BaseEntity {
 
     @ManyToOne
+    @JoinColumn(name = "account_id")
     private Account account;
 
     private Long amount;
+
+    @Column(name = "t_time")
     private Time time;
+
+    @Column(name = "t_date")
     private Date date;
+
+    @Column(name = "t_type")
     private TransactionType type;
+
+    @Column(name = "t_status")
     private TransactionStatus status;
 
     @Override

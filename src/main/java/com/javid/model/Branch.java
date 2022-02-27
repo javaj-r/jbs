@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.util.HashSet;
@@ -23,9 +24,11 @@ public class Branch extends BaseEntity {
     private String name;
 
     @OneToOne
+    @JoinColumn(name = "manager_id")
     private Employee manager;
 
     @OneToMany
+    @JoinColumn(name = "branch_id")
     private Set<Employee> employees = new HashSet<>();
 
     @Override

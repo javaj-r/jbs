@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
@@ -23,9 +24,11 @@ public class Employee extends BaseEntity {
     private EmployeeRole role;
 
     @ManyToOne
+    @JoinColumn(name = "manager_id")
     private Employee manager;
 
     @ManyToOne
+    @JoinColumn(name = "branch_id")
     private Branch branch;
 
     @Override
