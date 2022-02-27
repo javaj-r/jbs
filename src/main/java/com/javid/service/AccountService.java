@@ -3,8 +3,8 @@ package com.javid.service;
 import com.javid.model.Account;
 import com.javid.model.Customer;
 import com.javid.repository.AccountRepository;
-import com.javid.repository.impl.AccountRepositoryImpl;
 import com.javid.exception.AccountBalanceException;
+import com.javid.repository.hibernate.impl.AccountRepositoryImpl;
 
 import java.util.ArrayList;
 import java.util.List;
