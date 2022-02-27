@@ -1,5 +1,6 @@
 package com.javid.database;
 
+import com.javid.model.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hibernate.SessionFactory;
@@ -18,6 +19,13 @@ public class HibernateSessionFactory {
                     .build();
 
             INSTANCE = new MetadataSources(registry)
+                    .addAnnotatedClass(BaseEntity.class)
+                    .addAnnotatedClass(Branch.class)
+                    .addAnnotatedClass(Employee.class)
+                    .addAnnotatedClass(Customer.class)
+                    .addAnnotatedClass(Account.class)
+                    .addAnnotatedClass(Card.class)
+                    .addAnnotatedClass(Transaction.class)
                     .buildMetadata()
                     .buildSessionFactory();
         }
