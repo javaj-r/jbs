@@ -1,5 +1,6 @@
 package com.javid.service;
 
+import com.javid.database.HibernateSessionFactory;
 import com.javid.model.Customer;
 import com.javid.repository.CustomerRepository;
 import com.javid.exception.ForeignKeyViolationException;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public class CustomerService {
 
-    private final CustomerRepository repository = new CustomerRepositoryImpl();
+    private final CustomerRepository repository = new CustomerRepositoryImpl(HibernateSessionFactory.getInstance());
     private final AccountService accountService = new AccountService();
 
     public List<Customer> findAll() {

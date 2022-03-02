@@ -1,8 +1,8 @@
 package com.javid.repository.hibernate.impl;
 
-import com.javid.database.HibernateSessionFactory;
 import com.javid.model.Customer;
 import com.javid.repository.CustomerRepository;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
 
 import javax.persistence.NoResultException;
@@ -13,9 +13,10 @@ import java.util.List;
  * @author javid
  * Created on 1/16/2022
  */
+@RequiredArgsConstructor
 public class CustomerRepositoryImpl implements CustomerRepository {
 
-    private final SessionFactory sessionFactory = HibernateSessionFactory.getInstance();
+    private final SessionFactory sessionFactory;
 
     @Override
     public List<Customer> findAll() {
