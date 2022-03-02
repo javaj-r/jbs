@@ -41,9 +41,15 @@ public class TransactionConsole {
                 break;
 
             switch (choice) {
-                case 1 -> selectTransaction();
-                case 2 -> deleteTransaction();
-                case 3 -> showAccountTransactions();
+                case 1:
+                    selectTransaction();
+                    break;
+                case 2:
+                    deleteTransaction();
+                    break;
+                case 3:
+                    showAccountTransactions();
+                    break;
             }
         }
     }
@@ -68,9 +74,7 @@ public class TransactionConsole {
 
     private Transaction selectTransaction(String message) {
         List<Transaction> transactions = transactionService.findAll();
-        String[] arr = transactions.stream().map(Transaction::toString)
-                .toList()
-                .toArray(new String[0]);
+        String[] arr = transactions.stream().map(Transaction::toString).toArray(String[]::new);
 
         int choice = Screen.showMenu("", ""
                 , message, "Invalid choice"

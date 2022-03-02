@@ -6,6 +6,7 @@ import com.javid.service.BranchService;
 import com.javid.util.Screen;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author javid
@@ -49,10 +50,18 @@ public class BranchConsole {
                 break;
 
             switch (choice) {
-                case 1 -> selectBranch();
-                case 2 -> createBranch();
-                case 3 -> updateBranch();
-                case 4 -> deleteBranch();
+                case 1:
+                    selectBranch();
+                    break;
+                case 2:
+                    createBranch();
+                    break;
+                case 3:
+                    updateBranch();
+                    break;
+                case 4:
+                    deleteBranch();
+                    break;
             }
         }
     }
@@ -67,9 +76,7 @@ public class BranchConsole {
     public Branch selectBranch(String message) {
         List<Branch> branches = branchService.findAll();
         String[] arr = branches.stream()
-                .map(Branch::toString)
-                .toList()
-                .toArray(new String[0]);
+                .map(Branch::toString).toArray(String[]::new);
 
         int choice = Screen.showMenu("", "", message, "Invalid choice"
                 , "Cancel"

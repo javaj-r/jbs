@@ -25,17 +25,14 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     private static final String DATE = "t_date";
     private static final String TYPE = "t_type";
     private static final String STATUS = "t_status";
-    private static final String SELECT_QUERY = """
-            SELECT id, amount, t_time, t_date, t_type, t_status, account_id
-            FROM transactions
-            WHERE 1=1
-            %s;""";
-    private static final String TRANSACTION_QUERY = """
-            UPDATE account SET balance=balance + ?
-            WHERE id = ?;
-            INSERT INTO transactions(amount, account_id, t_time, t_date, t_type, t_status)
-            VALUES (?, ?, current_time, current_date, ?::transaction_type, ?::transaction_status);
-            """;
+    private static final String SELECT_QUERY = "SELECT id, amount, t_time, t_date, t_type, t_status, account_id"
+            + "\n FROM transactions"
+            + "\n WHERE 1=1"
+            + "\n %s;";
+    private static final String TRANSACTION_QUERY = "UPDATE account SET balance=balance + ?"
+            + "\n WHERE id = ?;"
+            + "\n INSERT INTO transactions(amount, account_id, t_time, t_date, t_type, t_status)"
+            + "\n VALUES (?, ?, current_time, current_date, ?::transaction_type, ?::transaction_status);";
 
     public void setConnection() {
         this.connection = DatabaseConnection.getInstance().getConnection();
@@ -45,7 +42,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     public List<Transaction> findAll() {
         setConnection();
         List<Transaction> transactions = new ArrayList<>();
-        String query = SELECT_QUERY.formatted("ORDER BY id");
+        String query = String.format(SELECT_QUERY, "ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -61,9 +58,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     @Override
     public Transaction findById(Long id) {
         setConnection();
-        String query = SELECT_QUERY.formatted("""
-                AND id = ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY,"AND id = ?" + "\n ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
@@ -80,10 +75,8 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     @Override
     public Long save(Transaction entity) {
         setConnection();
-        String query = """
-                INSERT INTO transactions(amount, account_id, t_time, t_date, t_type, t_status)
-                VALUES (?, ?, current_time, current_date, ?::transaction_type, ?::transaction_status);
-                """;
+        String query = "INSERT INTO transactions(amount, account_id, t_time, t_date, t_type, t_status)"
+                + "\n VALUES (?, ?, current_time, current_date, ?::transaction_type, ?::transaction_status);";
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             statement.setLong(1, entity.getAmount());
             statement.setLong(2, entity.getAccount().getId());
@@ -104,10 +97,8 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     @Override
     public void deleteById(Long id) {
         setConnection();
-        String query = """
-                DELETE FROM transactions
-                WHERE id = ?
-                """;
+        String query = "DELETE FROM transactions"
+                + "\n WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             statement.execute();
@@ -119,14 +110,12 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     @Override
     public void update(Transaction entity) {
         setConnection();
-        String query = """
-                UPDATE transactions
-                SET amount=?,
-                    account_id=?,
-                    t_type=?::transaction_type,
-                    t_status=?::transaction_status
-                WHERE id = ?;
-                """;
+        String query = "UPDATE transactions"
+                + "\n SET amount=?,"
+                + "\n     account_id=?,"
+                + "\n     t_type=?::transaction_type,"
+                + "\n     t_status=?::transaction_status"
+                + "\n WHERE id = ?;";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, entity.getAmount());
             statement.setLong(2, entity.getAccount().getId());
@@ -143,10 +132,9 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     public List<Transaction> findAllByAccountIdAndStartDate(Account account, Date startDate) {
         setConnection();
         List<Transaction> transactions = new ArrayList<>();
-        String query = SELECT_QUERY.formatted("""
-                AND account_id = ?
-                AND t_date >= ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY, "AND account_id = ?"
+                + "\n AND t_date >= ?"
+                + "\n ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, account.getId());
             statement.setDate(2, startDate);

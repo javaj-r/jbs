@@ -20,11 +20,10 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     private static final String FIRSTNAME = "firstname";
     private static final String LASTNAME = "lastname";
     private static final String NATIONAL_CODE = "national_code";
-    private static final String SELECT_QUERY = """
-            SELECT id, firstname, lastname, national_code
-            FROM customer
-            WHERE 1=1
-            %s;""";
+    private static final String SELECT_QUERY = "SELECT id, firstname, lastname, national_code"
+            + "\n FROM customer"
+            + "\n WHERE 1=1"
+            + "\n %s;";
 
     public void setConnection() {
         this.connection = DatabaseConnection.getInstance().getConnection();
@@ -34,7 +33,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     public List<Customer> findAll() {
         setConnection();
         List<Customer> customers = new ArrayList<>();
-        String query = SELECT_QUERY.formatted("ORDER BY id");
+        String query = String.format(SELECT_QUERY, "ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -50,9 +49,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public Customer findById(Long id) {
         setConnection();
-        String query = SELECT_QUERY.formatted("""
-                AND id = ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY,"AND id = ?" + "\n ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
@@ -69,10 +66,8 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public Long save(Customer entity) {
         setConnection();
-        String query = """
-                INSERT INTO customer (firstname, lastname, national_code)
-                VALUES (?, ?, ?);
-                """;
+        String query = "INSERT INTO customer (firstname, lastname, national_code)"
+                + "\n VALUES (?, ?, ?);";
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, entity.getFirstname());
             statement.setString(2, entity.getLastname());
@@ -93,11 +88,9 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public void deleteById(Long id) {
         setConnection();
-        String query = """
-                DELETE
-                FROM customer
-                WHERE id = ?
-                """;
+        String query = "DELETE"
+                + "\n FROM customer"
+                + "\n WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             statement.execute();
@@ -109,13 +102,11 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public void update(Customer entity) {
         setConnection();
-        String query = """
-                UPDATE customer
-                SET firstname=?,
-                    lastname=?,
-                    national_code=?
-                WHERE id = ?;
-                """;
+        String query = "UPDATE customer"
+                + "\n SET firstname=?,"
+                + "\n     lastname=?,"
+                + "\n     national_code=?"
+                + "\n WHERE id = ?;";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, entity.getFirstname());
             statement.setString(2, entity.getLastname());
@@ -130,9 +121,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     @Override
     public Customer findByNationalCode(Customer entity) {
         setConnection();
-        String query = SELECT_QUERY.formatted("""
-                AND national_code = ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY, "AND national_code = ?" + "\n ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, entity.getNationalCode());
             ResultSet resultSet = statement.executeQuery();

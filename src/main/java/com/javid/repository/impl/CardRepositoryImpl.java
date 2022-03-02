@@ -25,11 +25,10 @@ public class CardRepositoryImpl implements CardRepository {
     private static final String PASSWORD1 = "password1";
     private static final String PASSWORD2 = "password2";
     private static final String ACCOUNT_ID = "account_id";
-    private static final String SELECT_QUERY = """
-            SELECT id, cvv2, expire_date, enabled, card_number, password1, password2, account_id
-            FROM card
-            WHERE 1=1
-            %s;""";
+    private static final String SELECT_QUERY = "SELECT id, cvv2, expire_date, enabled, card_number, password1, password2, account_id"
+            + "\n FROM card"
+            + "\n WHERE 1=1"
+            + "\n %s;";
 
     public void setConnection() {
         this.connection = DatabaseConnection.getInstance().getConnection();
@@ -39,7 +38,7 @@ public class CardRepositoryImpl implements CardRepository {
     public List<Card> findAll() {
         setConnection();
         List<Card> cards = new ArrayList<>();
-        String query = SELECT_QUERY.formatted("ORDER BY id");
+        String query = String.format(SELECT_QUERY, "ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -55,9 +54,7 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public Card findById(Long id) {
         setConnection();
-        String query = SELECT_QUERY.formatted("""
-                AND id = ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY,"AND id = ?" + "\n ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
@@ -74,10 +71,8 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public Long save(Card entity) {
         setConnection();
-        String query = """
-                INSERT INTO card(cvv2, expire_date, enabled, card_number, password1, password2, account_id)
-                values (?, ?, ?, ?, ?, ?, ?);
-                """;
+        String query = "INSERT INTO card(cvv2, expire_date, enabled, card_number, password1, password2, account_id)"
+                + "\n values (?, ?, ?, ?, ?, ?, ?);";
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             PrimitiveHandler.setInt(statement, entity.getCvv2() == null
                     , 1, entity::getCvv2);
@@ -107,10 +102,8 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public void deleteById(Long id) {
         setConnection();
-        String query = """
-                DELETE FROM card
-                WHERE id = ?
-                """;
+        String query = "DELETE FROM card"
+                + "\n WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             statement.execute();
@@ -122,17 +115,15 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public void update(Card entity) {
         setConnection();
-        String query = """
-                UPDATE card
-                SET cvv2 =?,
-                    expire_date =?,
-                    enabled =?,
-                    card_number =?,
-                    password1 =?,
-                    password2 =?,
-                    account_id =?
-                WHERE id =?;
-                """;
+        String query = "UPDATE card"
+                + "\n SET cvv2 =?,"
+                + "\n     expire_date =?,"
+                + "\n     enabled =?,"
+                + "\n     card_number =?,"
+                + "\n     password1 =?,"
+                + "\n     password2 =?,"
+                + "\n     account_id =?"
+                + "\n WHERE id =?;";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             PrimitiveHandler.setInt(statement, entity.getCvv2() == null
                     , 1, entity::getCvv2);
@@ -161,17 +152,17 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public Date getExpireDate(int year) {
-        String query = """
-                SELECT (date_trunc('MONTH', current_date::date) + INTERVAL '%s YEAR + 1 MONTH - 1 day')::DATE;
-                """.formatted(year);
+        String query = String.format(
+                "SELECT (date_trunc('MONTH', current_date::date) + INTERVAL '%s YEAR + 1 MONTH - 1 day')::DATE;"
+                ,year);
         return getDate(query);
     }
 
     @Override
     public Date getExpireDate(Date date) {
-        String query = """
-                SELECT (date_trunc('MONTH', '%s'::date) + INTERVAL '1 MONTH - 1 day')::DATE;
-                """.formatted(date.toString());
+        String query = String.format(
+                "SELECT (date_trunc('MONTH', '%s'::date) + INTERVAL '1 MONTH - 1 day')::DATE;"
+                , date.toString());
         return getDate(query);
     }
 
@@ -192,9 +183,8 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public Card findByCardNumber(Long cardNumber) {
         setConnection();
-        String query = SELECT_QUERY.formatted("""
-                AND card_number = ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY,"AND card_number = ?"
+                + "\n ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, cardNumber);
             ResultSet resultSet = statement.executeQuery();

@@ -24,11 +24,10 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     private static final String PASSWORD = "password";
     private static final String BRANCH_ID = "branch_id";
     private static final String MANAGER_ID = "manager_id";
-    private static final String SELECT_QUERY = """
-            SELECT id, username, password, branch_id, manager_id, role
-            FROM employee
-            WHERE 1=1
-            %s;""";
+    private static final String SELECT_QUERY = "SELECT id, username, password, branch_id, manager_id, role"
+            + "\n FROM employee"
+            + "\n WHERE 1=1"
+            + "\n %s;";
 
     private void setConnection() {
         this.connection = DatabaseConnection.getInstance().getConnection();
@@ -38,7 +37,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     public List<Employee> findAll() {
         setConnection();
         List<Employee> employees = new ArrayList<>();
-        String query = SELECT_QUERY.formatted("ORDER BY id");
+        String query = String.format(SELECT_QUERY, "ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -54,9 +53,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public Employee findById(Long id) {
         setConnection();
-        String query = SELECT_QUERY.formatted("""
-                AND id = ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY, "AND id = ?" + "\n ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
@@ -73,11 +70,9 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public Long save(Employee entity) {
         setConnection();
-        String query = """
-                INSERT
-                INTO employee(username, password, branch_id, manager_id, role)
-                VALUES (?, ?, ?, ?, ?::employee_role);
-                """;
+        String query = "INSERT"
+                + "\n INTO employee(username, password, branch_id, manager_id, role)"
+                + "\n VALUES (?, ?, ?, ?, ?::employee_role);";
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, entity.getUsername());
             statement.setString(2, entity.getPassword());
@@ -102,11 +97,9 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public void deleteById(Long id) {
         setConnection();
-        String query = """
-                DELETE
-                FROM employee
-                WHERE id = ?
-                """;
+        String query = "DELETE"
+                + "\n FROM employee"
+                + "\n WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             statement.execute();
@@ -118,15 +111,13 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public void update(Employee entity) {
         setConnection();
-        String query = """
-                UPDATE employee
-                SET username=?,
-                    password=?,
-                    branch_id=?,
-                    manager_id=?,
-                    role=?::employee_role
-                WHERE id=?;
-                """;
+        String query = "UPDATE employee"
+                + "\n SET username=?,"
+                + "\n     password=?,"
+                + "\n     branch_id=?,"
+                + "\n     manager_id=?,"
+                + "\n     role=?::employee_role"
+                + "\n WHERE id=?;";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, entity.getUsername());
             statement.setString(2, entity.getPassword());
@@ -145,7 +136,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public Employee findByUsername(Employee entity) {
         setConnection();
-        String query = SELECT_QUERY.formatted("AND username = ?");
+        String query = String.format(SELECT_QUERY, "AND username = ?");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, entity.getUsername());
             ResultSet resultSet = statement.executeQuery();
@@ -162,9 +153,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     @Override
     public Employee findByUsernamePassword(Employee entity) {
         setConnection();
-        String query = SELECT_QUERY.formatted("""
-                AND username = ?
-                AND password = ?""");
+        String query = String.format(SELECT_QUERY, "AND username = ?" + "\n AND password = ?");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, entity.getUsername());
             statement.setString(2, entity.getPassword());

@@ -10,6 +10,7 @@ import com.javid.repository.hibernate.impl.AccountRepositoryImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author javid
@@ -28,7 +29,7 @@ public class AccountService {
                 .filter(Objects::nonNull)
                 .filter(account -> account.getCustomer() != null)
                 .filter(account -> customer.getId().equals(account.getCustomer().getId()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<Account> findAll() {

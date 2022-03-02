@@ -51,10 +51,18 @@ public class EmployeeConsole {
                 break;
 
             switch (choice) {
-                case 1 -> selectEmployee();
-                case 2 -> createEmployee();
-                case 3 -> updateEmployee();
-                case 4 -> deleteEmployee();
+                case 1:
+                    selectEmployee();
+                    break;
+                case 2:
+                    createEmployee();
+                    break;
+                case 3:
+                    updateEmployee();
+                    break;
+                case 4:
+                    deleteEmployee();
+                    break;
             }
         }
     }
@@ -68,9 +76,7 @@ public class EmployeeConsole {
 
     public Employee selectEmployee(String message) {
         List<Employee> employees = employeeService.findAll();
-        String[] arr = employees.stream().map(Employee::toString)
-                .toList()
-                .toArray(new String[0]);
+        String[] arr = employees.stream().map(Employee::toString).toArray( String[]::new);
 
         int choice = Screen.showMenu("", ""
                 , message, "Invalid choice"

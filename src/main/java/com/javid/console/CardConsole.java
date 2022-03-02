@@ -47,12 +47,24 @@ public class CardConsole {
                 break;
 
             switch (choice) {
-                case 1 -> selectCard();
-                case 2 -> createCard();
-                case 3 -> updateCard();
-                case 4 -> deleteCard();
-                case 5 -> changePassword();
-                case 6 -> transferMoneyCardToCard();
+                case 1:
+                    selectCard();
+                    break;
+                case 2:
+                    createCard();
+                    break;
+                case 3:
+                    updateCard();
+                    break;
+                case 4:
+                    deleteCard();
+                    break;
+                case 5:
+                    changePassword();
+                    break;
+                case 6:
+                    transferMoneyCardToCard();
+                    break;
             }
         }
     }
@@ -67,9 +79,7 @@ public class CardConsole {
 
     private Card selectCard(String message) {
         List<Card> cards = cardService.findAll();
-        String[] arr = cards.stream().map(Card::toString)
-                .toList()
-                .toArray(new String[0]);
+        String[] arr = cards.stream().map(Card::toString).toArray(String[]::new);
 
         int choice = Screen.showMenu("", "", message, "Invalid choice"
                 , "Cancel"

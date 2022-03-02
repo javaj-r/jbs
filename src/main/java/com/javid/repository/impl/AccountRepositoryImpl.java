@@ -25,11 +25,10 @@ public class AccountRepositoryImpl implements AccountRepository {
     private static final String BRANCH_ID = "branch_id";
     private static final String CARD_ID = "card_id";
     private static final String CUSTOMER_ID = "customer_id";
-    private static final String SELECT_QUERY = """
-            SELECT id, enabled, balance, customer_id, branch_id, card_id
-            FROM account
-            WHERE 1=1
-            %s;""";
+    private static final String SELECT_QUERY = "SELECT id, enabled, balance, customer_id, branch_id, card_id"
+            + "\n FROM account"
+            + "\n WHERE 1=1"
+            + "\n %s;";
 
 
     public void setConnection() {
@@ -40,7 +39,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     public List<Account> findAll() {
         setConnection();
         List<Account> accounts = new ArrayList<>();
-        String query = SELECT_QUERY.formatted("ORDER BY id");
+        String query = String.format(SELECT_QUERY, ("ORDER BY id"));
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -55,9 +54,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public Account findById(Long id) {
         setConnection();
-        String query = SELECT_QUERY.formatted("""
-                AND id = ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY, "AND id = ? \n ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
@@ -74,10 +71,8 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public Long save(Account entity) {
         setConnection();
-        String query = """
-                INSERT INTO account(enabled, balance, customer_id, branch_id, card_id)
-                values (?, ?, ?, ?, ?);
-                """;
+        String query = "INSERT INTO account(enabled, balance, customer_id, branch_id, card_id)"
+                + "\n values (?, ?, ?, ?, ?);";
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             statement.setBoolean(1, entity.isEnabled());
 
@@ -108,10 +103,8 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public void deleteById(Long id) {
         setConnection();
-        String query = """
-                DELETE FROM account
-                WHERE id = ?
-                """;
+        String query = "DELETE FROM account"
+                + "\n WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             statement.execute();
@@ -123,15 +116,13 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public void update(Account entity) {
         setConnection();
-        String query = """
-                UPDATE account
-                SET enabled=?,
-                    balance=?,
-                    customer_id=?,
-                    branch_id=?,
-                    card_id=?
-                WHERE id=?;
-                """;
+        String query = "UPDATE account"
+                + "\n SET enabled=?,"
+                + "\n     balance=?,"
+                + "\n     customer_id=?,"
+                + "\n     branch_id=?,"
+                + "\n     card_id=?"
+                + "\n WHERE id=?;";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBoolean(1, entity.isEnabled());
 
@@ -157,9 +148,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     public List<Account> findAllByCustomerId(Long customerId) {
         setConnection();
         List<Account> accounts = new ArrayList<>();
-        String query = SELECT_QUERY.formatted("""
-                AND customer_id = ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY, "AND customer_id = ? \n ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, customerId);
             ResultSet resultSet = statement.executeQuery();

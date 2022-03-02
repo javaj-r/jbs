@@ -43,10 +43,18 @@ public class CustomerConsole {
                 break;
 
             switch (choice) {
-                case 1 -> selectCustomer();
-                case 2 -> createCustomer();
-                case 3 -> updateCustomer();
-                case 4 -> deleteCustomer();
+                case 1:
+                    selectCustomer();
+                    break;
+                case 2:
+                    createCustomer();
+                    break;
+                case 3:
+                    updateCustomer();
+                    break;
+                case 4:
+                    deleteCustomer();
+                    break;
             }
         }
     }
@@ -61,9 +69,7 @@ public class CustomerConsole {
 
     public Customer selectCustomer(String message) {
         List<Customer> customers = customerService.findAll();
-        String[] arr = customers.stream().map(Customer::toString)
-                .toList()
-                .toArray(new String[0]);
+        String[] arr = customers.stream().map(Customer::toString).toArray(String[]::new);
 
         int choice = Screen.showMenu("", "", message, "Invalid choice"
                 , "Cancel"

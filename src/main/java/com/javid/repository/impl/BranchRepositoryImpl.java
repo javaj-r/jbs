@@ -20,11 +20,10 @@ public class BranchRepositoryImpl implements BranchRepository {
     private static final String ID = "id";
     private static final String NAME = "name";
     private static final String MANAGER_ID = "manager_id";
-    private static final String SELECT_QUERY = """
-            SELECT id, name, manager_id
-            FROM branch
-            WHERE 1=1
-            %s;""";
+    private static final String SELECT_QUERY = "SELECT id, name, manager_id"
+            + "\n FROM branch"
+            + "\n WHERE 1=1"
+            + "\n %s;";
 
 
     public void setConnection() {
@@ -35,7 +34,7 @@ public class BranchRepositoryImpl implements BranchRepository {
     public List<Branch> findAll() {
         setConnection();
         List<Branch> branches = new ArrayList<>();
-        String query = SELECT_QUERY.formatted("ORDER BY id");
+        String query = String.format(SELECT_QUERY, "ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -51,9 +50,7 @@ public class BranchRepositoryImpl implements BranchRepository {
     @Override
     public Branch findById(Long id) {
         setConnection();
-        String query = SELECT_QUERY.formatted("""
-                AND id = ?
-                ORDER BY id""");
+        String query = String.format(SELECT_QUERY,"AND id = ?\n" + "ORDER BY id");
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
@@ -70,10 +67,8 @@ public class BranchRepositoryImpl implements BranchRepository {
     @Override
     public Long save(Branch entity) {
         setConnection();
-        String query = """
-                INSERT INTO branch(name, manager_id)
-                values (?, ?);
-                """;
+        String query = "INSERT INTO branch(name, manager_id)"
+                + "\n values (?, ?);";
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, entity.getName());
 
@@ -95,10 +90,8 @@ public class BranchRepositoryImpl implements BranchRepository {
     @Override
     public void deleteById(Long id) {
         setConnection();
-        String query = """
-                DELETE FROM branch
-                WHERE id = ?
-                """;
+        String query = "DELETE FROM branch"
+                + "\n WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setLong(1, id);
             statement.execute();
@@ -110,12 +103,10 @@ public class BranchRepositoryImpl implements BranchRepository {
     @Override
     public void update(Branch entity) {
         setConnection();
-        String query = """
-                UPDATE branch
-                SET name=?,
-                    manager_id=?
-                WHERE id=?;
-                """;
+        String query = "UPDATE branch"
+                + "\n SET name=?,"
+                + "\n     manager_id=?"
+                + "\n WHERE id=?;";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, entity.getName());
 

@@ -11,6 +11,7 @@ import com.javid.exception.AuthenticationException;
 import java.sql.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author javid
@@ -38,7 +39,7 @@ public class CardService {
                                      + ((account.getCustomer().getId() + 10000000) % 100000000)
                                      + ((account.getId() + 1000) % 10000));
 
-        Random random = new Random();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         card.setCvv2(random.nextInt(100, 1000))
                 .setExpireDate(repository.getExpireDate(3))
                 .setNumber(number)

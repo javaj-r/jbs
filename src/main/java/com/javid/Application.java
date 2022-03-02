@@ -31,12 +31,24 @@ public class Application {
                     break;
 
                 switch (choice) {
-                    case 1 -> BranchConsole.getInstance().mainMenu();
-                    case 2 -> EmployeeConsole.getInstance().mainMenu();
-                    case 3 -> CustomerConsole.getInstance().mainMenu();
-                    case 4 -> AccountConsole.getInstance().mainMenu();
-                    case 5 -> CardConsole.getInstance().mainMenu();
-                    case 6 -> TransactionConsole.getInstance().mainMenu();
+                    case 1:
+                        BranchConsole.getInstance().mainMenu();
+                        break;
+                    case 2:
+                        EmployeeConsole.getInstance().mainMenu();
+                        break;
+                    case 3:
+                        CustomerConsole.getInstance().mainMenu();
+                        break;
+                    case 4:
+                        AccountConsole.getInstance().mainMenu();
+                        break;
+                    case 5:
+                        CardConsole.getInstance().mainMenu();
+                        break;
+                    case 6:
+                        TransactionConsole.getInstance().mainMenu();
+                        break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();

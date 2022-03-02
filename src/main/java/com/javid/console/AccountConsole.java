@@ -9,6 +9,7 @@ import com.javid.service.CustomerService;
 import com.javid.util.Screen;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author javid
@@ -48,12 +49,24 @@ public class AccountConsole {
                 break;
 
             switch (choice) {
-                case 1 -> selectAccount();
-                case 2 -> createAccount();
-                case 3 -> updateAccount();
-                case 4 -> deleteAccount();
-                case 5 -> showCustomerAccountsById();
-                case 6 -> showCustomerAccounts();
+                case 1:
+                    selectAccount();
+                    break;
+                case 2:
+                    createAccount();
+                    break;
+                case 3:
+                    updateAccount();
+                    break;
+                case 4:
+                    deleteAccount();
+                    break;
+                case 5:
+                    showCustomerAccountsById();
+                    break;
+                case 6:
+                    showCustomerAccounts();
+                    break;
             }
         }
     }
@@ -98,9 +111,7 @@ public class AccountConsole {
 
     public Account selectAccount(String message) {
         List<Account> accounts = accountService.findAll();
-        String[] arr = accounts.stream().map(Account::toString)
-                .toList()
-                .toArray(new String[0]);
+        String[] arr = accounts.stream().map(Account::toString).toArray(String[]::new);
 
         int choice = Screen.showMenu("", "", message, "Invalid choice"
                 , "Cancel"
