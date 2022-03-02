@@ -1,5 +1,6 @@
 package com.javid.service;
 
+import com.javid.database.HibernateSessionFactory;
 import com.javid.model.Account;
 import com.javid.model.Customer;
 import com.javid.repository.AccountRepository;
@@ -16,7 +17,7 @@ import java.util.Objects;
  */
 public class AccountService {
 
-    private final AccountRepository repository = new AccountRepositoryImpl();
+    private final AccountRepository repository = new AccountRepositoryImpl(HibernateSessionFactory.getInstance());
 
     public List<Account> findAllByCustomerId(Customer customer) {
         if (customer.isNew())

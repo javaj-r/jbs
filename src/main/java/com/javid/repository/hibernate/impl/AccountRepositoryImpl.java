@@ -1,8 +1,8 @@
 package com.javid.repository.hibernate.impl;
 
-import com.javid.database.HibernateSessionFactory;
 import com.javid.model.Account;
 import com.javid.repository.AccountRepository;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
 
 import java.util.ArrayList;
@@ -12,9 +12,11 @@ import java.util.List;
  * @author javid
  * Created on 1/16/2022
  */
+
+@RequiredArgsConstructor
 public class AccountRepositoryImpl implements AccountRepository {
 
-    private final SessionFactory sessionFactory = HibernateSessionFactory.getInstance();
+    private final SessionFactory sessionFactory;
 
     @Override
     public List<Account> findAll() {
