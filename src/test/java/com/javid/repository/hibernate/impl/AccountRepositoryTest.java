@@ -122,6 +122,16 @@ class AccountRepositoryTest {
 
     @Test
     void update() {
+        var account = new Account();
+        when(session.beginTransaction()).thenReturn(transaction);
+
+        accountRepository.update(account);
+
+        verify(sessionFactory).openSession();
+        verify(session).beginTransaction();
+        verify(transaction).commit();
+        verify(session).update(accountCaptor.capture());
+        assertEquals(account, accountCaptor.getValue());
     }
 
     @Test
